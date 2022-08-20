@@ -431,7 +431,8 @@
 				teams
 			} = state;
 			const roundOfCurrentTeam = teams[currentTurn.team-1];
-			roundOfCurrentTeam.pointsPerRound[currentRound.count-1] += roundOfCurrentTeam.pointsPerRound[currentRound.count-1] + currentTurn.wordsGuessed.length;
+
+			roundOfCurrentTeam.pointsPerRound[currentRound.count-1] = roundOfCurrentTeam.pointsPerRound[currentRound.count-1] + currentTurn.wordsGuessed.length;
 			roundOfCurrentTeam.wordsGuessed.push(currentTurn.wordsGuessed);
 
 			if (currentTurn.team === teams.length) {
