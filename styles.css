@@ -80,7 +80,9 @@ button:focus {
 }
 
 .word img {
-	max-height: 25vmax;
+	height: 80%;
+	max-height: 60vh;
+	width: auto;
 	margin: 0 auto;
 	display: block;
 }
