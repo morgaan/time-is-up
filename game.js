@@ -5,7 +5,7 @@
 		let teamsCountElement;
 		let currentRoundElement;
 		let roundsCountElement;
-		let roundRuleElement;
+		// let roundRuleElement;
 		let currentTurnWordsToGuessElement;
 		let guessedCountElement;
 		let passedCountElement;
@@ -108,7 +108,7 @@
 			teamsCountElement = app.querySelector('#teamsCount');
 			currentRoundElement = app.querySelector('#currentRound');
 			roundsCountElement = app.querySelector('#roundsCount');
-			roundRuleElement = app.querySelector('#roundRule');
+			// roundRuleElement = app.querySelector('#roundRule');
 			currentTurnWordsToGuessElement = app.querySelector('#currentTurnWordsToGuessedCount');
 			guessedCountElement = app.querySelector('#guessedCount');
 			passedCountElement = app.querySelector('#passedCount');
@@ -134,7 +134,7 @@
 			teamsCountElement.innerText = teams.length;
 			currentRoundElement.innerText = currentRound.count;
 			roundsCountElement.innerText = roundsCount;
-			roundRuleElement.innerText = currentRound.rule;
+			// roundRuleElement.innerText = currentRound.rule;
 			guessedCountElement.innerText = currentTurn.wordsGuessed.length;
 			currentTurnWordsToGuessElement.innerText = currentTurn.wordsToGuessCount;
 			passedCountElement.innerText = currentTurn.wordsPassed.length;
@@ -155,7 +155,8 @@
 			app.removeAttribute('style');
 			liveRegionElement.setAttribute('class', 'sr-only');
 
-			liveRegionElement.innerText = `Le jeu est prêt pour la manche ${currentRound.count}, c'est au tour de l'équipe ${currentTurn.team} de jouer. La consige est: ${currentRound.rule}`;
+			// liveRegionElement.innerText = `Le jeu est prêt pour la manche ${currentRound.count}, c'est au tour de l'équipe ${currentTurn.team} de jouer. La consige est: ${currentRound.rule}`;
+			startOfRound();
 
 			guessedCountElement.addEventListener('wordGuessed', function updateGuessedCount() {
 				const currentGuessedCount = new Number(this.textContent);
@@ -171,9 +172,9 @@
 				this.textContent = event.detail.count;
 			});
 
-			roundRuleElement.addEventListener('newRound', function updateRoundRule(event) {
-				this.textContent = event.detail.rule;
-			});
+			// roundRuleElement.addEventListener('newRound', function updateRoundRule(event) {
+			// 	this.textContent = event.detail.rule;
+			// });
 
 			guessedCountElement.addEventListener('reset', function updateGuessedCount() {
 				this.textContent = 0;
@@ -348,6 +349,19 @@
 			}));
 		}
 
+		function startOfRound() {
+			const {
+				currentRound
+			} = state;
+
+			let message = `Début de la manche ${currentRound.count}\n\n`;
+
+			message += `Rappel de la règle:\n${currentRound.rule}\n\n`;
+			message += `\nC'est au tour de l'équipe ${state.currentTurn.team}`;
+
+			alert(message);
+		}
+
 		function endOfRound() {
 			const {
 				currentRound,
@@ -362,9 +376,9 @@
 				message += `L'équipe ${index+1} a marqué ${score} point${score > 1 ? 's' : ''}\n`;
 			});
 
-			if (currentRound.count !== roundsCount) {
-				message += `\nAu tour de l'équipe ${state.currentTurn.team} de débuter la manche ${currentRound.count+1}`;
-			}
+			// if (currentRound.count !== roundsCount) {
+			// 	message += `\nAu tour de l'équipe ${state.currentTurn.team} de débuter la manche ${currentRound.count+1}`;
+			// }
 
 			alert(message);
 
@@ -407,11 +421,15 @@
 				}
 			});
 
+			if (currentRound.count !== roundsCount) {
+				startOfRound();
+			}
+
 			shuffle(state.gameDeck);
 			state.wordsToGuess = [...state.gameDeck];
 
 			currentRoundElement.dispatchEvent(newRoundEvent);
-			roundRuleElement.dispatchEvent(newRoundEvent);
+			// roundRuleElement.dispatchEvent(newRoundEvent);
 			passButtonElement.dispatchEvent(newRoundEvent);
 
 			guessedCountElement.dispatchEvent(new CustomEvent('reset'));
