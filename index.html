@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="fr">
+	<head>
+		<meta charset="UTF-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Time's up</title>
+		<link rel="stylesheet" href="./styles.css">
+	</head>
+	<body>
+		<h1>Time's up</h1> 
+		<p>Bienvenue dans notre jeu de Time's up&#8239;!</p>
+		<form method="GET" action="./game.html">
+			<div>
+				<fieldset>
+					<legend>Nombre d'équipes</legend>
+					<label>
+						<input id="teams-count" name="teams-count" type="radio"value="2">
+						<span>2</span>
+					</label>
+					<label>
+						<input id="teams-count" name="teams-count" type="radio"value="3">
+						<span>3</span>
+					</label>
+					<label>
+						<input id="teams-count" name="teams-count" type="radio"value="4">
+						<span>4</span>
+					</label>
+				</fieldset>
+			</div>
+			<div>
+				<fieldset>
+					<legend>Version</legend>
+					<label>
+						<input id="version" name="version" type="radio"value="kids-with-images">
+						<span>Enfants avec images</span>
+					</label>
+				</fieldset>
+				<fieldset>
+					<legend>Nombre de mots</legend>
+					<label>
+						<input id="words-count" name="words-count" type="radio"value="10">
+						<span>10</span>
+					</label>
+					<label>
+						<input id="words-count" name="words-count" type="radio"value="20">
+						<span>20</span>
+					</label>
+				</fieldset>
+			</div>
+			<button type="submit">
+				C'est parti!
+			</button>
+		</form>
+	</body>
+</html>

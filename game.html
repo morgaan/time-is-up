@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="fr">
+	<head>
+		<meta charset="UTF-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Time's up</title>
+		<link rel="stylesheet" href="./styles.css">
+	</head>
+	<body>
+		<h1 class="sr-only">Time's up en cours</h1> 
+		<span aria-live="assertive" id="live-region">
+			Chargement...
+		</span>
+
+		<div id="app" class="app" style="display: none";>
+			<div class="box">
+				<h2>Equipe</h2><br>
+				<span id="currentTurnTeam"></span>/<span id="teamsCount"></span><br><br>
+				<a href="./index.html" class="restart">Recommencer</a>
+			</div>
+
+			<div class="box round">
+				<h2>Manche <span id="currentRound"></span>/<span id="roundsCount"></span></h2><br>
+				<span id="roundRule"></span>
+			</div>
+
+			<div class="box counter">
+				<h2 class="sr-only">Compteurs</h2>
+				 <strong>Trouvés</strong> <span id="guessedCount"></span>/<span id="currentTurnWordsToGuessedCount"></span><br>
+				<strong>Passés</strong> <span id="passedCount"></span>
+			</div>
+
+
+			<button class="box control pass" id="pass">
+				<img src="./images/icons/skip.svg" alt="Passe">
+			</button>
+
+			<div class="word-end">
+				<div class="box word-wrapper">
+					<h2 class="sr-only">Carte en cours</h2>
+					<div class="word" id="word">
+					</div>
+				</div>
+				<button class="box control stop" id="stop">
+					Stop !
+				</button>
+			</div>
+
+			<button class="box control guessed" id="guessed">
+				<img src="./images/icons/checkmark.svg" alt="Trouvé">
+			</button>
+		</div>
+
+		<script>
+			(function(document, window){
+				document.addEventListener('DOMContentLoaded', function loadConfig() {
+					const searchParams = new URLSearchParams(location.search); 
+					window.localStorage.setItem('teamsCount', searchParams.get('teams-count'));
+					window.localStorage.setItem('wordsCount', searchParams.get('words-count'));
+					
+					const versionScript = document.createElement('script');
+					versionScript.src = `./version-${searchParams.get('version')}.js`;
+					document.querySelector('body').appendChild(versionScript);
+
+					const gameScript = document.createElement('script');
+					gameScript.src = `./game.js`;
+					document.querySelector('body').appendChild(gameScript);
+				});
+			})(document, window);
+		</script>
+	</body>
+</html>
+

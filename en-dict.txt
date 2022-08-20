@@ -1,0 +1,121 @@
+// From before vacation
+x manège => carousel
+x manteau => jacket
+x lunettes => glasses
+x marteau => marteau
+x maison => house
+x micro => microphone
+x lune => moon
+x moto => motorcycle
+x machine a laver => washing machine
+x montre => watch
+x loup => wolf
+
+
+
+
+
+// Not found
+oreiller => pillow
+piscine => swimming pool
+pizza => pizza
+poubelle => trash can
+poupée => doll
+puzzle => jigsaw
+rose => rose
+rouge à lèvres => lipstick
+sorcière => witch
+table => table
+taille-crayon => pencil sharpener
+taupe => mole
+train => train
+trampoline => trampoline
+trousse => pencil case
+tétine => baby pacifier
+âne => donkey
+échelle => ladder
+brosse
+
+// To give attribution (https://www.freepik.com)
+x tobogan => slide
+x pompier => fireman
+x policière => police woman
+x pirate => pirate
+x princesse => princess
+
+// To find better option
+ours
+
+x mouche => fly
+x moulin => Windmill
+x moustache => mustache
+x moustique => mosquito
+x niche => doghouse, kennel
+x nuage => cloud
+x oeuf => egg
+x ordinateur => computer
+x os => bone
+x ours => bear
+x paille => straw
+x panier => basket
+x pansement => bandage
+x pantalon => pants
+x papier toilette, => toilet paper
+x papillon => butterfly
+x parachute => parachute
+x parapluie => umbrella
+x patins à roulettes => roller skate
+x pelle => shovel
+x peluche => teddy bear
+x perroquet => parrot
+x piano => piano
+x pinceau => paint brush
+x pistolet à eau => water pistol
+x plume => feather
+x poisson => fish
+x pomme => apple
+x poule => hen
+x poussette => stroller
+x poussin => chick
+x poêle => frying pan
+x père-noël => santa claus
+x raisin => grapes
+x raquette => racket
+x renard => fox
+x requin => shark
+x robot => robot
+x roi => king
+x réveil => alarm clock
+x sapin => christmas tree
+x savon => soap
+x scie => saw
+x scotch (ruban adhésif) => tape
+x seringue => Syringe
+x serpent => snake
+x singe => monkey
+x sirène => mermaid
+x soleil => sun
+x souris => mouse
+x sous-marin => submarine
+x sucette => lollipop
+x tablette => tablet
+x tambour => drum
+x tente => tent
+x tondeuse => Lawnmower
+x tortue => turtle
+x toupie => spinner
+x tournevis => screwdriver
+x tracteur => tractor
+x trompette => trumpet
+x trottinette => scooter
+x téléphone => telephone
+x vache => cow
+x ver de terre => worm
+x verre => drinking glass
+x voiture => car
+x volcan => volcano
+x vélo => bicycle (ou bike)
+x écharpe => scarf
+x éléphant => elephant
+x éponge => sponge
+x épée => sword

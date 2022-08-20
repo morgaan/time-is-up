@@ -1,0 +1,171 @@
+/**
+ * Base layer
+ */
+* {
+	box-sizing: border-box;
+}
+
+body {
+	background-color: #1C1C1C;
+	color: white;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 20px;
+	margin: 0 10px;
+}
+
+h1 {
+	margin-top: 1rem;
+	margin-bottom: 1rem;
+	color: #FFF529;
+}
+
+h2 {
+	display: inline;
+	color: #FFF529;
+	font-size: 20px;
+}
+
+fieldset {
+	margin-top: 1rem;
+	border: 0px none;
+}
+
+legend {
+	font-weight: bold;
+	color: #28BFCF;
+}
+
+label {
+	display: block;
+}
+
+button {
+	display: block;
+	margin: 1rem auto 0 auto;
+	border-radius: 4px;
+	border: 0px none;
+	padding: 16px 32px;
+	color: #152336;
+	font-size: 1rem;
+	font-weight: bold;
+	background-color: #28BFCF;
+}
+
+button:hover,
+button:focus {
+	filter: contrast(130%);
+}
+
+*:focus {
+	outline: 3px solid #28BFCF;
+}
+
+/**
+ * Components layer
+ */
+
+.app {
+	display: grid;
+	grid-gap: 10px;
+	grid-template-columns: [col] 1fr [col] 2fr [col] 1fr;
+	grid-template-rows: [row] fit-content(100%) [row] auto [row] ;
+	height: 98vh;
+	font-size: 16px;
+}
+
+.word {
+	display: flex;
+	align-items: center;
+	height: 100%
+}
+
+.word img {
+	max-height: 25vmax;
+	margin: 0 auto;
+	display: block;
+}
+
+figcaption {
+	text-align: center;
+	color: #152336;
+}
+
+.counter {
+	text-align: center;
+	font-size: 18px;
+}
+
+.counter {
+	text-align: right;
+}
+
+.counter strong {
+	color: #FFF529;
+}
+
+.word-wrapper {
+	background-color: white;
+}
+
+.word-end {
+	display: grid;
+	grid-gap: 5px;
+	grid-template-columns: [col] auto;
+	grid-template-rows: [row] auto [row] 20%;
+}
+
+.box {
+	width: 100%;
+	padding: 8px;
+	border-radius: 4px;
+}
+
+.control {
+	margin: 0;
+}
+
+.control img {
+	height: 50px;
+}
+
+.pass {
+	background-color: #FF3C41;
+}
+
+.stop {
+	background-color: #f8a805;
+	text-transform: uppercase;
+}
+
+.guessed {
+	background-color: #8edd65;
+}
+
+[disabled].pass {
+	background-color: #AAAAAA;
+}
+
+[disabled].pass img {
+	opacity: 30%;
+}
+
+.restart {
+	color: #28BFCF;
+	text-decoration: underline;
+}
+
+/**
+ * Utility layer
+ */
+
+/* Hiding class, making content visible only to screen readers but not visually */
+/* "sr" meaning "screen-reader" */
+.sr-only:not(:focus):not(:active) {
+	clip: rect(0 0 0 0);
+	clip-path: inset(50%);
+	height: 1px;
+	overflow: hidden;
+	position: absolute;
+	white-space: nowrap;
+	width: 1px;
+}
