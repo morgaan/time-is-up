@@ -10,8 +10,8 @@
 	<body>
 		<h1>Time's up</h1> 
 		<p>Bienvenue dans notre jeu de Time's up&#8239;!</p>
-		<form method="GET" action="./game.html">
-			<div>
+		<form method="GET" action="./game.html" class="c-settings">
+			<div class="c-settings__teams">
 				<fieldset>
 					<legend>Nombre d'équipes</legend>
 					<label>
@@ -28,14 +28,7 @@
 					</label>
 				</fieldset>
 			</div>
-			<div>
-				<fieldset>
-					<legend>Version</legend>
-					<label>
-						<input id="version" name="version" type="radio"value="kids-with-images">
-						<span>Enfants avec images</span>
-					</label>
-				</fieldset>
+			<div class="c-settings__words">
 				<fieldset>
 					<legend>Nombre de mots</legend>
 					<label>
@@ -48,7 +41,16 @@
 					</label>
 				</fieldset>
 			</div>
-			<button type="submit">
+			<div class="c-settings__version">
+				<fieldset>
+					<legend>Version</legend>
+					<label>
+						<input id="version" name="version" type="radio"value="kids-with-images">
+						<span>Enfants avec images</span>
+					</label>
+				</fieldset>
+			</div>
+			<button class="c-button c-settings__submit" type="submit">
 				C'est parti!
 			</button>
 		</form>

@@ -143,6 +143,7 @@
 				const dictionaryEntry = version.dictionary[currentWord];
 				const imgElement = document.createElement('img');
 				imgElement.id = 'image';
+				imgElement.classList.add('c-word__image');
 				imgElement.src = `./images/${dictionaryEntry.img}`;
 				imgElement.alt = `${currentWord}${currentWord !== dictionaryEntry.desc ? `: ${dictionaryEntry.desc}` : currentWord}`;
 				wordElement.appendChild(imgElement);

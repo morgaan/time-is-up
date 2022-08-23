@@ -8,46 +8,49 @@
 		<link rel="stylesheet" href="./styles.css">
 	</head>
 	<body>
-		<h1 class="sr-only">Time's up en cours</h1> 
+		<h1 class="sr-only">Partie en cours...</h1>
 		<span aria-live="assertive" id="live-region">
 			Chargement...
 		</span>
 
 		<div id="app" class="app" style="display: none";>
-			<div class="box">
-				<h2>Equipe</h2><br>
+			<a class="c-box c-box--logo" href="./index.html">
+				Time is up
+			</a>
+
+			<div class="c-box" id="round">
+				<h2>Manche</h2>
+				<span id="currentRound"></span>/<span id="roundsCount"></span></h2>
+			</div>
+
+			<div class="c-box">
+				<h2>Equipe</h2>
 				<span id="currentTurnTeam"></span>/<span id="teamsCount"></span><br><br>
 			</div>
 
-			<div class="box round">
-				<h2>Manche <span id="currentRound"></span>/<span id="roundsCount"></span></h2><br>
-				<a href="./index.html" class="restart">Recommencer la partie</a>
-			</div>
-
-			<div class="box counter">
+			<div class="c-box" id="counters">
 				<h2 class="sr-only">Compteurs</h2>
-				 <strong>Trouvés</strong> <span id="guessedCount"></span>/<span id="currentTurnWordsToGuessedCount"></span><br>
-				<strong>Passés</strong> <span id="passedCount"></span>
+				<h3>Trouvés</h3> <span id="guessedCount"></span>/<span id="currentTurnWordsToGuessedCount"></span><br>
+				<h3>Passés</h3> <span id="passedCount"></span>
 			</div>
 
 
-			<button class="box control pass" id="pass">
-				<img src="./images/icons/skip.svg" alt="Passe">
+			<button class="c-button c-button--stop" id="stop">
+				<img src="./images/icons/stop.svg" alt="Stop">
 			</button>
 
-			<div class="word-end">
-				<div class="box word-wrapper">
-					<h2 class="sr-only">Carte en cours</h2>
-					<div class="word" id="word">
-					</div>
+			<button class="c-button c-button--skip" id="pass">
+				<img src="./images/icons/thumbs-down.svg" alt="Passe">
+			</button>
+
+			<div class="c-box c-word">
+				<h2 class="sr-only">Mot en cours</h2>
+				<div class="c-word__wrapper" id="word">
 				</div>
-				<button class="box control stop" id="stop">
-					Stop !
-				</button>
 			</div>
 
-			<button class="box control guessed" id="guessed">
-				<img src="./images/icons/checkmark.svg" alt="Trouvé">
+			<button class="c-button c-button--guessed" id="guessed">
+				<img src="./images/icons/thumbs-up.svg" alt="Trouvé">
 			</button>
 		</div>
 
