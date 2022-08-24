@@ -71,9 +71,9 @@ figcaption {
 	grid-template-columns: repeat(4, 1fr);
 	grid-template-rows: 10vh 2fr 1fr auto;
 	grid-template-areas: "logo  logo logo    stop"
-	"word  word word    word"
-	"skip  skip succeed succeed"
-	"round team skipped guessed";
+						 "word  word word    word"
+					     "skip  skip succeed succeed"
+						 "round team skipped guessed";
 
 	height: calc(100vh - .9rem);
 }
@@ -83,7 +83,7 @@ figcaption {
 		display: grid;
 		grid-gap: .5rem;
 		grid-template-columns: 20vw repeat(4, 1fr) 20vw;
-		grid-template-rows: 10vh 1fr;
+		grid-template-rows: 20vh 1fr;
 		grid-template-areas: "logo round team skipped guessed stop"
 							"skip  word word word word succeed";
 		height: calc(100vh - 1rem);
