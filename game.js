@@ -5,14 +5,11 @@
 		let teamsCountElement;
 		let currentRoundElement;
 		let roundsCountElement;
-		// let roundRuleElement;
 		let currentTurnWordsToGuessElement;
 		let guessedCountElement;
 		let passedCountElement;
 		let wordElement;
-		let guessedButtonElement;
-		let passButtonElement;
-		let stopButtonElement;
+		let skipButtonElement;
 		let state;
 		const version = JSON.parse(window.localStorage.getItem('version'));
 
@@ -113,8 +110,7 @@
 			guessedCountElement = app.querySelector('#guessedCount');
 			passedCountElement = app.querySelector('#passedCount');
 			wordElement = app.querySelector('#word');
-			guessedButtonElement = app.querySelector('#guessed');
-			passButtonElement = app.querySelector('#pass');
+			skipButtonElement = app.querySelector('#skip');
 			stopButtonElement = app.querySelector('#stop');
 
 			initState();
@@ -150,7 +146,7 @@
 			}
 
 			if (!currentRound.passingAllowed) {
-				passButtonElement.setAttribute('disabled', true);
+				skipButtonElement.setAttribute('disabled', true);
 			}
 
 			app.removeAttribute('style');
@@ -189,12 +185,12 @@
 				this.textContent = event.detail.newCount;
 			});
 
-			passButtonElement.addEventListener('newRound', function updatePassButton(event) {
+			skipButtonElement.addEventListener('newRound', function updatePassButton(event) {
 				if (event.detail.passingAllowed) {
-					passButtonElement.removeAttribute('disabled');
+					skipButtonElement.removeAttribute('disabled');
 					return;
 				}
-				passButtonElement.setAttribute('disabled', true);
+				skipButtonElement.setAttribute('disabled', true);
 			});
 
 			wordElement.addEventListener('draw', function updateWordElement(event) {
@@ -430,8 +426,7 @@
 			state.wordsToGuess = [...state.gameDeck];
 
 			currentRoundElement.dispatchEvent(newRoundEvent);
-			// roundRuleElement.dispatchEvent(newRoundEvent);
-			passButtonElement.dispatchEvent(newRoundEvent);
+			skipButtonElement.dispatchEvent(newRoundEvent);
 
 			guessedCountElement.dispatchEvent(new CustomEvent('reset'));
 			currentTurn.wordsToGuessCount = state.wordsToGuess.length;
@@ -501,13 +496,13 @@
 
 	TimesUp.init(app);
 
-	app.querySelector('#guessed').addEventListener('click', function guessed(event) {
+	app.querySelector('#succeed').addEventListener('click', function succeed(event) {
 		event.preventDefault();
 
 		TimesUp.onWordGuessed();
 	});
 
-	app.querySelector('#pass').addEventListener('click', function skip(event) {
+	app.querySelector('#skip').addEventListener('click', function skip(event) {
 		event.preventDefault();
 
 		TimesUp.onWordSkipped();
@@ -518,14 +513,4 @@
 
 		TimesUp.onStopTurn();
 	});
-
-
-	// List of possible events
-	//
-	// - onWordGuessed
-	// - onWordPassed
-	// - onStopTurn
-	// - onRoundSwitch
-	// - onEndGame
-	// - onResetGame
 })(window, document, undefined);

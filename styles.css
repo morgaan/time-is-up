@@ -66,12 +66,70 @@ figcaption {
  */
 
 .app {
-  display: grid;
-  grid-gap: .5rem;
-  grid-template-columns: 1fr auto auto 1fr 1fr;
-  grid-template-rows: auto 1fr;
-  height: calc(100vh - 1rem);
+	display: grid;
+	grid-gap: .3rem;
+	grid-template-columns: repeat(4, 1fr);
+	grid-template-rows: 10vh 2fr 1fr auto;
+	grid-template-areas: "logo  logo logo    stop"
+	"word  word word    word"
+	"skip  skip succeed succeed"
+	"round team skipped guessed";
+
+	height: calc(100vh - .9rem);
 }
+
+@media only screen and (min-width: 581px) {
+	.app {
+		display: grid;
+		grid-gap: .5rem;
+		grid-template-columns: 20vw repeat(4, 1fr) 20vw;
+		grid-template-rows: 10vh 1fr;
+		grid-template-areas: "logo round team skipped guessed stop"
+							"skip  word word word word succeed";
+		height: calc(100vh - 1rem);
+	}
+}
+
+.c-logo {
+	grid-area: logo;
+}
+
+.c-stop {
+	grid-area: stop;
+}
+
+.c-word {
+	grid-area: word;
+}
+
+.c-skip {
+	grid-area: skip;
+}
+
+.c-succeed {
+	grid-area: succeed;
+}
+
+.c-counters {
+	grid-area: counters;
+}
+
+.c-round {
+	grid-area: round;
+}
+
+.c-team {
+	grid-area: team;
+}
+
+.c-skipped {
+	grid-area: skipped;
+}
+
+.c-guessed {
+	grid-area: guessed;
+}
+
 
 .c-settings {
 	display: grid;
@@ -107,7 +165,6 @@ figcaption {
 .c-word {
 	background-color: #f5f5f5;
 	color: black;
-	grid-column: span 3;
 }
 
 .c-word__wrapper {
@@ -145,7 +202,10 @@ figcaption {
 }
 
 .c-button--stop > img {
-	width: 30%;
+	width: auto;
+	height: 95%;
+	display: block;
+	margin: 0 auto;
 }
 
 .c-button--skip {
@@ -153,7 +213,7 @@ figcaption {
   color: #35292c;
 }
 
-.c-button--guessed {
+.c-button--succeed {
   background-color: #47cf73;
 }
 
