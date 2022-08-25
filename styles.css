@@ -88,10 +88,18 @@ figcaption {
 							"skip  word word word word succeed";
 		height: calc(100vh - 1rem);
 	}
+
+	.c-logo img {
+		max-width: 150px;
+	}
 }
 
 .c-logo {
 	grid-area: logo;
+}
+
+.c-logo img {
+	max-height: 50px;
 }
 
 .c-stop {
