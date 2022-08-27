@@ -11,6 +11,8 @@
 		let wordElement;
 		let skipButtonElement;
 		let timerElement;
+		let timerVisualElement;
+		let timerRemainingElement;
 		let state;
 		let timerHandle;
 		let beep;
@@ -122,6 +124,8 @@
 			skipButtonElement = app.querySelector('#skip');
 			stopButtonElement = app.querySelector('#stop');
 			timerElement = app.querySelector('#timer');
+			timerVisualElement = timerElement.querySelector('#timer-visual');
+			timerRemainingElement = timerElement.querySelector('#timer-remaining');
 			beep = document.querySelector('#beep');
 			beep.play();
 			beep.pause();
@@ -145,7 +149,7 @@
 			guessedCountElement.innerText = currentTurn.wordsGuessed.length;
 			currentTurnWordsToGuessElement.innerText = currentTurn.wordsToGuessCount;
 			passedCountElement.innerText = currentTurn.wordsPassed.length;
-			timerElement.innerHTML = `${timer.remaining}&#8239;<span aria-label="seconds">s</span>`
+			timerRemainingElement.innerHTML = `${timer.remaining}&#8239;<span aria-label="seconds">s</span>`
 
 			if (hasImages) {
 				const dictionaryEntry = version.dictionary[currentWord];
@@ -233,7 +237,9 @@
 
 			timerElement.addEventListener('update', function updateTimerElement(event) {
 				const remaining = event.detail.remaining;
-				this.innerHTML = `${remaining}&#8239;<span aria-label="second${remaining === 1 ? '' : 's'}">s</span>`;
+				const percentage = Math.trunc((remaining * 100)/version.timer);
+				timerVisualElement.style.setProperty('--timer-visual-width', `${percentage}%`);
+				timerRemainingElement.innerHTML = `${remaining}&#8239;<span aria-label="second${remaining === 1 ? '' : 's'}">s</span>`;
 			});
 		}
 
@@ -400,7 +406,7 @@
 			timer.end = now + (timer.remaining * 1000);
 			timer.remaining--;
 
-			timerElement.innerHTML = `${timer.remaining}&#8239;<span aria-label="seconds">s</span>`
+			timerRemainingElement.innerHTML = `${timer.remaining}&#8239;<span aria-label="seconds">s</span>`
 
 			timerHandle = setInterval(countdown, 1000);
 		}

@@ -56,7 +56,9 @@
 				<img src="./images/icons/thumbs-down.svg" alt="Passe">
 			</button>
 
-			<div class="c-box c-timer" role="timer" id="timer">
+			<div class="c-box c-timer" role="timer" id="timer" aria-atomic="true">
+				<div class="c-timer__visual" id="timer-visual"></div>
+				<div class="c-timer__remaining sr-only" id="timer-remaining"></div>
 			</div>
 
 			<div class="c-box c-word">

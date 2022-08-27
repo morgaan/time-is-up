@@ -1,6 +1,10 @@
 /**
  * Base layer
  */
+:root {
+	--timer-visual-width: 100%;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -141,8 +145,20 @@ figcaption {
 }
 
 .c-timer {
+	position: relative;
 	grid-area: timer;
 	text-align: center;
+}
+
+.c-timer__visual {
+	position: absolute;
+	top: 0;
+	bottom: 100%;
+	left: 0;
+	border-radius: 6px;
+	width: var(--timer-visual-width);
+	height: 100%;
+	background-color: deeppink;
 }
 
 .c-settings {
@@ -190,8 +206,9 @@ figcaption {
 
 .c-word__image {
 	height: 80%;
-	max-height: 45vh;
 	width: auto;
+	max-height: 45vh;
+	max-width: 95%;
 }
 
 .c-button {
