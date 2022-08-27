@@ -51,9 +51,12 @@
 
 		// Temporary until implementation of dialog.
 		function resetTimeIsUpSound() {
-			tickSound.play();
-			tickSound.pause();
-			tickSound.currentTime = 0;
+			guessedSound.play();
+			guessedSound.pause();
+			guessedSound.currentTime = 0;
+			// tickSound.play();
+			// tickSound.pause();
+			// tickSound.currentTime = 0;
 			timeIsUpSound.play();
 			timeIsUpSound.pause();
 			timeIsUpSound.currentTime = 0;
@@ -268,8 +271,8 @@
 			timer.remaining = Math.trunc((timer.end - now)/1000);
 
 			if (timer.remaining < 10 && timer.remaining >= 0) {
-				tickSound.currentTime = 0;
-				tickSound.play();
+				guessedSound.currentTime = 0;
+				guessedSound.play();
 			}
 
 			timerElement.dispatchEvent(new CustomEvent('update', {
