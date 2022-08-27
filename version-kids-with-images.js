@@ -1,6 +1,6 @@
 const version = {
 	hasImages: true,
-	timer: 10,
+	timer: 80,
 	rounds: [
 		'freeSpeech',
 		'mimeAndSounds'
