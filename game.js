@@ -45,6 +45,12 @@
 			}
 		}
 
+		function resetAudio() {
+			beep.play();
+			beep.pause();
+			beep.currentTime = 0;
+		}
+
 		function createGameDeck(wordsCount) {
 			let deck;
 
@@ -127,8 +133,6 @@
 			timerVisualElement = timerElement.querySelector('#timer-visual');
 			timerRemainingElement = timerElement.querySelector('#timer-remaining');
 			beep = document.querySelector('#beep');
-			beep.play();
-			beep.pause();
 
 			initState();
 
@@ -551,7 +555,8 @@
 			init,
 			onWordGuessed,
 			onWordSkipped,
-			onStopTurn
+			onStopTurn,
+			resetAudio
 		};
 	})();
 
@@ -561,13 +566,13 @@
 
 	app.querySelector('#succeed').addEventListener('click', function succeed(event) {
 		event.preventDefault();
-
+		TimesUp.resetAudio();
 		TimesUp.onWordGuessed();
 	});
 
 	app.querySelector('#skip').addEventListener('click', function skip(event) {
 		event.preventDefault();
-
+		TimesUp.resetAudio();
 		TimesUp.onWordSkipped();
 	});
 
