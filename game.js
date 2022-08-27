@@ -19,6 +19,7 @@
 		let skippedSound;
 		let guessedSound;
 		let stopSound;
+		let tickSound;
 
 		const version = JSON.parse(window.localStorage.getItem('version'));
 
@@ -53,6 +54,9 @@
 			timeIsUpSound.play();
 			timeIsUpSound.pause();
 			timeIsUpSound.currentTime = 0;
+			tickSound.play();
+			tickSound.pause();
+			tickSound.currentTime = 0;
 		}
 
 		function createGameDeck(wordsCount) {
@@ -140,6 +144,7 @@
 			skippedSound = document.querySelector('#skipped-sound');
 			guessedSound = document.querySelector('#guessed-sound');
 			stopSound = document.querySelector('#stop-sound');
+			tickSound = document.querySelector('#tick-sound');
 
 			initState();
 
@@ -261,6 +266,10 @@
 			} = state;
 
 			timer.remaining = Math.trunc((timer.end - now)/1000);
+
+			if (timer.remaining < 10 && timer.remaining >= 0) {
+				tickSound.play();
+			}
 
 			timerElement.dispatchEvent(new CustomEvent('update', {
 				detail: {
