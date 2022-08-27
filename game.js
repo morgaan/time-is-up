@@ -15,7 +15,10 @@
 		let timerRemainingElement;
 		let state;
 		let timerHandle;
-		let beep;
+		let timeIsUpSound;
+		let skippedSound;
+		let guessedSound;
+		let stopSound;
 
 		const version = JSON.parse(window.localStorage.getItem('version'));
 
@@ -45,10 +48,11 @@
 			}
 		}
 
-		function resetAudio() {
-			beep.play();
-			beep.pause();
-			beep.currentTime = 0;
+		// Temporary until implementation of dialog.
+		function resetTimeIsUpSound() {
+			timeIsUpSound.play();
+			timeIsUpSound.pause();
+			timeIsUpSound.currentTime = 0;
 		}
 
 		function createGameDeck(wordsCount) {
@@ -132,7 +136,10 @@
 			timerElement = app.querySelector('#timer');
 			timerVisualElement = timerElement.querySelector('#timer-visual');
 			timerRemainingElement = timerElement.querySelector('#timer-remaining');
-			beep = document.querySelector('#beep');
+			timeIsUpSound = document.querySelector('#time-is-up-sound');
+			skippedSound = document.querySelector('#skipped-sound');
+			guessedSound = document.querySelector('#guessed-sound');
+			stopSound = document.querySelector('#stop-sound');
 
 			initState();
 
@@ -263,8 +270,8 @@
 
 			if (timer.remaining <= 0) {
 				clearInterval(timerHandle);
-				beep.currentTime = 0;
-				beep.play();
+				timeIsUpSound.currentTime = 0;
+				timeIsUpSound.play();
 				endOfTurn();
 			}
 		}
@@ -286,9 +293,15 @@
 				passedCountElement.dispatchEvent(new CustomEvent('wordPassed'));
 			}
 
+			skippedSound.currentTime = 0;
+			skippedSound.play();
+	
 			if (totalPlayed < currentTurn.wordsToGuessCount) {
 				draw();
 			}
+
+			// temporary until dialog is implemented
+			resetTimeIsUpSound();
 
 			if (totalPlayed === currentTurn.wordsToGuessCount) {
 				endOfTurn();
@@ -313,9 +326,15 @@
 				guessedCountElement.dispatchEvent(new CustomEvent('wordGuessed'));
 			}
 
+			guessedSound.currentTime = 0;
+			guessedSound.play();
+
 			if (totalPlayed < currentTurn.wordsToGuessCount) {
 				draw();
 			}
+
+			// temporary until dialog is implemented
+			resetTimeIsUpSound();
 
 			if (totalPlayed === currentTurn.wordsToGuessCount) {
 				endOfTurn();
@@ -324,6 +343,9 @@
 		}
 
 		function onStopTurn() {
+			stopSound.currentTime = 0;
+			stopSound.play();
+
 			endOfTurn();
 		}
 
@@ -463,6 +485,8 @@
 			});
 
 			alert(message);
+
+			location.href = '/index.html';
 		}
 
 		function updateRound() {
@@ -555,8 +579,7 @@
 			init,
 			onWordGuessed,
 			onWordSkipped,
-			onStopTurn,
-			resetAudio
+			onStopTurn
 		};
 	})();
 
@@ -566,13 +589,11 @@
 
 	app.querySelector('#succeed').addEventListener('click', function succeed(event) {
 		event.preventDefault();
-		TimesUp.resetAudio();
 		TimesUp.onWordGuessed();
 	});
 
 	app.querySelector('#skip').addEventListener('click', function skip(event) {
 		event.preventDefault();
-		TimesUp.resetAudio();
 		TimesUp.onWordSkipped();
 	});
 
