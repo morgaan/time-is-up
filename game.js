@@ -277,6 +277,9 @@
 		}
 
 		function onWordSkipped() {
+			skippedSound.currentTime = 0;
+			skippedSound.play();
+
 			const {
 				currentTurn,
 				wordsToGuess
@@ -292,9 +295,6 @@
 			if (totalPlayed <= currentTurn.wordsToGuessCount) {
 				passedCountElement.dispatchEvent(new CustomEvent('wordPassed'));
 			}
-
-			skippedSound.currentTime = 0;
-			skippedSound.play();
 	
 			if (totalPlayed < currentTurn.wordsToGuessCount) {
 				draw();
@@ -310,6 +310,9 @@
 		}
 
 		function onWordGuessed() {
+			guessedSound.currentTime = 0;
+			guessedSound.play();
+
 			const {
 				currentTurn,
 				wordsToGuess
@@ -325,9 +328,6 @@
 			if (totalPlayed <= currentTurn.wordsToGuessCount) {
 				guessedCountElement.dispatchEvent(new CustomEvent('wordGuessed'));
 			}
-
-			guessedSound.currentTime = 0;
-			guessedSound.play();
 
 			if (totalPlayed < currentTurn.wordsToGuessCount) {
 				draw();
