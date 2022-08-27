@@ -1,5 +1,6 @@
 const version = {
 	hasImages: true,
+	timer: 10,
 	rounds: [
 		'freeSpeech',
 		'mimeAndSounds'
@@ -585,6 +586,10 @@ const version = {
 			img: 'piano.svg',
 			desc: 'piano noir à queue, ouvert, vu de trois quarts'
  		},
+		'piscine': {
+			img: 'swimming-pool.svg',
+			desc: 'piscine en forme de huit avec son échelle'
+ 		},
 		'pinceau': {
 			img: 'paint-brush.svg',
 			desc: 'pinceau de peinture, aux poils orange, vu de côté et incliné en position prêt à peindre'
@@ -596,6 +601,10 @@ const version = {
 		'pistolet à eau': {
 			img: 'water-pistol.svg',
 			desc: 'pistolet à eau orange avec son réservoir jaune sur le dessus, vu de côté'
+		},
+		pizza: {
+			img: 'pizza.svg',
+			desc: 'pizza avec tomates, oignons, champignons, fromage et piment vert'
 		},
 		'plume': {
 			img: 'feather.svg',
@@ -620,6 +629,10 @@ const version = {
 		'poule': {
 			img: 'hen.svg',
 			desc: 'poule blanche vu de profil à la crête rouge'
+		},
+		'poupée': {
+			img: 'doll.svg',
+			desc: 'poupée en tissus avec un grand sourire, des cheveux roses et une robe rose'
 		},
 		'poussette': {
 			img: 'stroller.svg',
@@ -659,11 +672,15 @@ const version = {
 		},
 		'robot': {
 			img: 'robot.svg',
-			desc: 'robot aux couleurs rouge, jaune et bleue, avec antenne'
+			desc: 'robot jouet gris aux yeux verts, la bouche rouge, les oreilles rouges, et une LED rouge au niveau du coeur'
 		},
 		'roi': {
 			img: 'king.svg',
 			desc: 'buste de roi, regardant vers sa gauche, avec un haut bleu et une cape rose, aux cheveux et à la barbe gris clair'
+		},
+		'rose': {
+			img: 'rose.svg',
+			desc: 'a red rose'
 		},
 		'réveil': {
 			img: 'alarm-clock.svg',
@@ -701,11 +718,11 @@ const version = {
 			img: 'mermaid.svg',
 			desc: 'sirène aux cheveux et à la queue roses la poitrine couverte par deux coquilles roses de saint-jacques'
 		},
-		'soleil': {
+		soleil: {
 			img: 'sun.svg',
 			desc: 'soleil jaune vif et aux rayons sous formes de petits triangles'
 		},
-		'souris': {
+		souris: {
 			img: 'mouse.svg',
 			desc: 'jeune souris grise claire, de profil, à la queue et aux pieds roses '
 		},
@@ -713,7 +730,7 @@ const version = {
 			img: 'submarine.svg',
 			desc: 'sous-marin aux teintes jaunes orangées, vu de côté, surmonté de son périscope et aux hublots turquoise'
 		},
-		'sucette': {
+		sucette: {
 			img: 'lollipop.svg',
 			desc: 'sucette ronde de couleur violette pâle'
 		},

@@ -69,11 +69,12 @@ figcaption {
 	display: grid;
 	grid-gap: .3rem;
 	grid-template-columns: repeat(4, 1fr);
-	grid-template-rows: 10vh 2fr 1fr auto;
-	grid-template-areas: "logo  logo logo    stop"
-						 "word  word word    word"
-					     "skip  skip succeed succeed"
-						 "round team skipped guessed";
+	grid-template-rows: 10vh auto 2fr 1fr auto;
+	grid-template-areas: "logo  logo  logo    stop"
+						 "timer timer timer   timer"
+						 "word  word  word    word"
+					     "skip  skip  succeed succeed"
+						 "round team  skipped guessed";
 
 	height: calc(100vh - .9rem);
 }
@@ -83,8 +84,9 @@ figcaption {
 		display: grid;
 		grid-gap: .5rem;
 		grid-template-columns: 20vw repeat(4, 1fr) 20vw;
-		grid-template-rows: 20vh 1fr;
+		grid-template-rows: 20vh auto 1fr;
 		grid-template-areas: "logo round team skipped guessed stop"
+							 "timer timer timer timer timer timer"
 							"skip  word word word word succeed";
 		height: calc(100vh - 1rem);
 	}
@@ -138,6 +140,10 @@ figcaption {
 	grid-area: guessed;
 }
 
+.c-timer {
+	grid-area: timer;
+	text-align: center;
+}
 
 .c-settings {
 	display: grid;

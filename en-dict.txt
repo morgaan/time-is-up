@@ -17,21 +17,21 @@ x loup => wolf
 
 // Not found
 oreiller => pillow
-piscine => swimming pool
-pizza => pizza
+x piscine => swimming pool
+x pizza => pizza
 poubelle => trash can
-poupée => doll
-puzzle => jigsaw
-rose => rose
+x poupée => doll
+~ puzzle => jigsaw
+x rose => rose
 rouge à lèvres => lipstick
 sorcière => witch
 table => table
-taille-crayon => pencil sharpener
+~ taille-crayon => pencil sharpener
 taupe => mole
 train => train
 trampoline => trampoline
 trousse => pencil case
-tétine => baby pacifier
+~ tétine => baby pacifier
 âne => donkey
 échelle => ladder
 brosse

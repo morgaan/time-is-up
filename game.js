@@ -10,7 +10,11 @@
 		let passedCountElement;
 		let wordElement;
 		let skipButtonElement;
+		let timerElement;
 		let state;
+		let timerHandle;
+		let beep;
+
 		const version = JSON.parse(window.localStorage.getItem('version'));
 
 		const roundRules = {
@@ -56,7 +60,7 @@
 		}
 
 		function initState() {
-			const {rounds} = version;
+			const {rounds, timer} = version;
 			const teamsCount = Number.parseInt(window.localStorage.getItem('teamsCount'));
 			const wordsCount = Number.parseInt(window.localStorage.getItem('wordsCount'));
 			const roundsCount = rounds.length;
@@ -78,6 +82,11 @@
 					wordsGuessed : [],
 					wordsPassed : [],
 					wordsToGuessCount: gameDeck.length
+				},
+				timer: {
+					end: null,
+					remaining: timer,
+					max: timer
 				}
 			};
 
@@ -112,6 +121,10 @@
 			wordElement = app.querySelector('#word');
 			skipButtonElement = app.querySelector('#skip');
 			stopButtonElement = app.querySelector('#stop');
+			timerElement = app.querySelector('#timer');
+			beep = document.querySelector('#beep');
+			beep.play();
+			beep.pause();
 
 			initState();
 
@@ -121,19 +134,18 @@
 				teams,
 				currentRound,
 				roundsCount,
-				currentTurnWordsToGuessedCount,
-				currentWord
+				currentWord,
+				timer
 			} = state;
 
-			const roundOfCurrentTeam = teams[currentTurn.team-1];
 			currentTurnTeamElement.innerText = currentTurn.team;
 			teamsCountElement.innerText = teams.length;
 			currentRoundElement.innerText = currentRound.count;
 			roundsCountElement.innerText = roundsCount;
-			// roundRuleElement.innerText = currentRound.rule;
 			guessedCountElement.innerText = currentTurn.wordsGuessed.length;
 			currentTurnWordsToGuessElement.innerText = currentTurn.wordsToGuessCount;
 			passedCountElement.innerText = currentTurn.wordsPassed.length;
+			timerElement.innerHTML = `${timer.remaining}&#8239;<span aria-label="seconds">s</span>`
 
 			if (hasImages) {
 				const dictionaryEntry = version.dictionary[currentWord];
@@ -152,7 +164,6 @@
 			app.removeAttribute('style');
 			liveRegionElement.setAttribute('class', 'sr-only');
 
-			// liveRegionElement.innerText = `Le jeu est prêt pour la manche ${currentRound.count}, c'est au tour de l'équipe ${currentTurn.team} de jouer. La consige est: ${currentRound.rule}`;
 			startOfRound();
 
 			guessedCountElement.addEventListener('wordGuessed', function updateGuessedCount() {
@@ -168,10 +179,6 @@
 			currentRoundElement.addEventListener('newRound', function updateCurrentRound(event) {
 				this.textContent = event.detail.count;
 			});
-
-			// roundRuleElement.addEventListener('newRound', function updateRoundRule(event) {
-			// 	this.textContent = event.detail.rule;
-			// });
 
 			guessedCountElement.addEventListener('reset', function updateGuessedCount() {
 				this.textContent = 0;
@@ -223,6 +230,33 @@
 			currentTurnTeamElement.addEventListener('newTeam', function updateTeamCount(event) {
 				this.textContent = event.detail.newTeam;
 			});
+
+			timerElement.addEventListener('update', function updateTimerElement(event) {
+				const remaining = event.detail.remaining;
+				this.innerHTML = `${remaining}&#8239;<span aria-label="second${remaining === 1 ? '' : 's'}">s</span>`;
+			});
+		}
+
+		function countdown() {
+			const now = new Date().getTime();
+			const {
+				timer
+			} = state;
+
+			timer.remaining = Math.trunc((timer.end - now)/1000);
+
+			timerElement.dispatchEvent(new CustomEvent('update', {
+				detail: {
+					remaining: timer.remaining
+				}
+			}));
+
+			if (timer.remaining <= 0) {
+				clearInterval(timerHandle);
+				beep.currentTime = 0;
+				beep.play();
+				endOfTurn();
+			}
 		}
 
 		function onWordSkipped() {
@@ -305,7 +339,8 @@
 			const {
 				wordsToGuess,
 				currentRound,
-				currentTurn
+				currentTurn,
+				timer
 			} = state;
 
 
@@ -332,10 +367,17 @@
 				}));
 
 				alert(`Au tour de l'équipe ${currentTurn.team}`);
+
+				startTimer();
 			} else {
 				endOfRound();
 			}
 
+			timerElement.dispatchEvent(new CustomEvent('update', {
+				detail: {
+					remaining: timer.max
+				}
+			}));
 			guessedCountElement.dispatchEvent(new CustomEvent('reset'));
 			passedCountElement.dispatchEvent(new CustomEvent('reset'));
 
@@ -346,9 +388,26 @@
 			}));
 		}
 
+
+		function startTimer() {
+			const {
+				timer
+			} = state;
+
+			timer.remaining = timer.max;
+
+			const now = new Date().getTime();
+			timer.end = now + (timer.remaining * 1000);
+			timer.remaining--;
+
+			timerElement.innerHTML = `${timer.remaining}&#8239;<span aria-label="seconds">s</span>`
+
+			timerHandle = setInterval(countdown, 1000);
+		}
+
 		function startOfRound() {
 			const {
-				currentRound
+				currentRound,
 			} = state;
 
 			let message = `Début de la manche ${currentRound.count}\n\n`;
@@ -357,6 +416,8 @@
 			message += `\nC'est au tour de l'équipe ${state.currentTurn.team}`;
 
 			alert(message);
+
+			startTimer();
 		}
 
 		function endOfRound() {
@@ -372,10 +433,6 @@
 				const score = team.pointsPerRound[currentRound.count-1];
 				message += `L'équipe ${index+1} a marqué ${score} point${score > 1 ? 's' : ''}\n`;
 			});
-
-			// if (currentRound.count !== roundsCount) {
-			// 	message += `\nAu tour de l'équipe ${state.currentTurn.team} de débuter la manche ${currentRound.count+1}`;
-			// }
 
 			alert(message);
 
