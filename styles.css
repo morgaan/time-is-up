@@ -256,6 +256,49 @@ figcaption {
 	opacity: 30%;
 }
 
+
+
+
+.c-dialog {
+	display: none;
+}
+
+.c-dialog.opened {
+	display: block;
+}
+
+.c-dialog__window {
+	display: grid;
+	grid-template-rows: auto 1fr auto;
+	grid-gap: 24px;
+	z-index: 101;
+	position: fixed;
+	top: 3vh;
+	bottom: 3vh;
+	left: 3vw;
+	right: 3vw;
+	border-radius: 6px;
+	padding: 1rem;
+	background: #27284c;
+}
+
+.c-dialog__window > h2 {
+	font-size: 1.5rem;
+	text-align: center;
+}
+
+.c-dialog__mask {
+	z-index: 100;
+	position: fixed;
+	top: 0;
+	left: 0;
+	height: 100%;
+	width: 100%;
+	background-color: black;
+	opacity: 0.6;
+	overflow: hidden;
+}
+
 /**
  * Utility layer
  */

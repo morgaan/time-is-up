@@ -77,6 +77,17 @@
 		<audio id="stop-sound" preload="auto" src="audio-clips/stop.mp3"></audio>
 		<audio id="tick-sound" preload="auto" src="audio-clips/tick.mp3"></audio>
 
+		<div role="dialog" class="c-dialog" aria-labelledby="dialog-title" aria-modal="true" id="dialog">
+			<div class="c-dialog__window" id="dialog-window">
+				<h2 id="dialog-title">Init title</h2>
+				<div id="dialog-content">
+					Init content
+				</div>
+				<button class="c-button" id="dialog-button">Ok</button>
+			</div>
+			<div class="c-dialog__mask" id="dialog-mask"></div>
+		</div>
+
 		<script>
 			(function(document, window){
 				document.addEventListener('DOMContentLoaded', function loadConfig() {

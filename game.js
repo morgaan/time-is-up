@@ -20,6 +20,11 @@
 		let guessedSound;
 		let stopSound;
 		let tickSound;
+		let previousActiveElement;
+		let dialog;
+		let dialogMask;
+		let dialogWindow;
+		let dialogOnCloseCallback;
 
 		const version = JSON.parse(window.localStorage.getItem('version'));
 
@@ -130,7 +135,6 @@
 			teamsCountElement = app.querySelector('#teamsCount');
 			currentRoundElement = app.querySelector('#currentRound');
 			roundsCountElement = app.querySelector('#roundsCount');
-			// roundRuleElement = app.querySelector('#roundRule');
 			currentTurnWordsToGuessElement = app.querySelector('#currentTurnWordsToGuessedCount');
 			guessedCountElement = app.querySelector('#guessedCount');
 			passedCountElement = app.querySelector('#passedCount');
@@ -145,6 +149,9 @@
 			guessedSound = document.querySelector('#guessed-sound');
 			stopSound = document.querySelector('#stop-sound');
 			tickSound = document.querySelector('#tick-sound');
+			dialog = document.querySelector('#dialog');
+			dialogMask = dialog.querySelector('#dialog-mask');
+			dialogWindow = dialog.querySelector('#dialog-window');
 
 			initState();
 
@@ -309,9 +316,6 @@
 			skippedSound.currentTime = 0;
 			skippedSound.play();
 
-			// temporary until dialog is implemented
-			resetTimeIsUpSound();
-
 			if (totalPlayed === currentTurn.wordsToGuessCount) {
 				endOfTurn();
 				return;
@@ -341,9 +345,6 @@
 			guessedSound.currentTime = 0;
 			guessedSound.play();
 
-			// temporary until dialog is implemented
-			resetTimeIsUpSound();
-
 			if (totalPlayed === currentTurn.wordsToGuessCount) {
 				endOfTurn();
 				return;
@@ -370,6 +371,66 @@
 
 			wordElement.dispatchEvent(drawEvent);
 			liveRegionElement.dispatchEvent(drawEvent);
+		}
+
+		function infoDialog(title, content, buttonLabel, callback) {
+			dialogWindow.querySelector('#dialog-title').textContent = title;
+			dialogWindow.querySelector('#dialog-content').innerHTML = content;
+			dialogWindow.querySelector('#dialog-button').textContent = buttonLabel;
+
+			const button = dialogWindow.querySelector('#dialog-button');
+			dialogOnCloseCallback = callback;
+			button.addEventListener('click', closeDialog);
+
+			openDialog();
+		}
+
+		function openDialog() {
+			previousActiveElement = document.activeElement;
+
+			Array.from(document.body.children).forEach(child => {
+				if (child !== dialog && ['audio', 'script'].includes(child.tagName)) {
+					child.inert = true;
+				}
+			});
+
+			dialog.classList.add('opened');
+
+			dialogMask.addEventListener('click', closeDialog);
+			const button = dialogWindow.querySelector('#dialog-button');
+			button.addEventListener('click', closeDialog);
+			document.addEventListener('keydown', checkCloseDialog);
+
+			dialog.querySelector('button').focus();
+		}
+
+		function checkCloseDialog() {
+			// Check for Escape key.
+			if (e.keyCode === 27) {
+				closeDialog();
+			}
+		}
+
+		function closeDialog() {
+			dialogMask.removeEventListener('click', closeDialog);
+			dialogWindow.querySelector('button').removeEventListener('click', closeDialog);
+			document.removeEventListener('keydown', checkCloseDialog);
+
+			Array.from(document.body.children).forEach(child => {
+				if (child !== dialog && ['audio', 'script'].includes(child.tagName)) {
+					child.inert = false;
+				}
+			});
+
+			dialog.classList.remove('opened');
+
+			previousActiveElement.focus();
+
+			if (dialogOnCloseCallback) {
+				dialogOnCloseCallback();
+			}
+
+			dialogOnCloseCallback = null;
 		}
 
 		function endOfTurn() {
@@ -450,14 +511,14 @@
 				currentRound,
 			} = state;
 
-			let message = `Début de la manche ${currentRound.count}\n\n`;
+			let message = `Rappel de la règle:<br>${currentRound.rule}<br><br>`;
+			message += `C'est au tour de l'équipe ${state.currentTurn.team}`;
 
-			message += `Rappel de la règle:\n${currentRound.rule}\n\n`;
-			message += `\nC'est au tour de l'équipe ${state.currentTurn.team}`;
+			infoDialog(`Début de la manche ${currentRound.count}`, message, 'Commençer !', function startTimerCallback() {
+				resetTimeIsUpSound();
+				startTimer();
+			});
 
-			alert(message);
-
-			startTimer();
 		}
 
 		function endOfRound() {
