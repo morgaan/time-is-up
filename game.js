@@ -287,9 +287,6 @@
 		}
 
 		function onWordSkipped() {
-			skippedSound.currentTime = 0;
-			skippedSound.play();
-
 			const {
 				currentTurn,
 				wordsToGuess
@@ -309,6 +306,8 @@
 			if (totalPlayed < currentTurn.wordsToGuessCount) {
 				draw();
 			}
+			skippedSound.currentTime = 0;
+			skippedSound.play();
 
 			// temporary until dialog is implemented
 			resetTimeIsUpSound();
@@ -320,9 +319,6 @@
 		}
 
 		function onWordGuessed() {
-			guessedSound.currentTime = 0;
-			guessedSound.play();
-
 			const {
 				currentTurn,
 				wordsToGuess
@@ -342,6 +338,8 @@
 			if (totalPlayed < currentTurn.wordsToGuessCount) {
 				draw();
 			}
+			guessedSound.currentTime = 0;
+			guessedSound.play();
 
 			// temporary until dialog is implemented
 			resetTimeIsUpSound();
