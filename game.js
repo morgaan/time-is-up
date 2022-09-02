@@ -1,5 +1,3 @@
-// TODO Fix issue, end of round does not update to next round
-// TODO Fix issue, visual timer is broken
 // TODO Swap alerts with dialogs
 (function(window, document, undefined) {
 	const TimesUp = (function() {
@@ -143,7 +141,8 @@
 			} else {
 				STATE.nextRound();
 
-				if (currentRound.count !== roundsCount) {
+				if (currentRound.count <= roundsCount) {
+					UI.setupBoard();
 					startOfRound();
 				}
 			}
@@ -390,12 +389,14 @@
 					imgElement.alt = `${currentWord}${currentWord !== dictionaryEntry.desc ? `: ${dictionaryEntry.desc}` : currentWord}`;
 					wordElement.appendChild(imgElement);
 					wordImageElement = wordElement.querySelector('img');
-				} else if (hasImage && wordImageElement) {
+				} else if (hasImages && wordImageElement) {
 					wordImageElement.src = `./images/${dictionaryEntry.img}`;
 					wordImageElement.alt = `${currentWord}${currentWord !== dictionaryEntry.desc ? `: ${dictionaryEntry.desc}` : currentWord}`;
 				}
 
-				if (!currentRound.wordSkipAllowed) {
+				if (currentRound.wordSkipAllowed) {
+					failedButtonElement.removeAttribute('disabled');
+				} else {
 					failedButtonElement.setAttribute('disabled', true);
 				}
 			},
@@ -504,7 +505,7 @@
 				tickSound.play();
 			}
 
-			timerElement.dispatchEvent(new CustomEvent('update', {
+			app.dispatchEvent(new CustomEvent('updateTimer', {
 				detail: {
 					remaining: timer.remaining
 				}
