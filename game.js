@@ -1,6 +1,14 @@
 // TODO Swap alerts with dialogs
 (function(window, document, undefined) {
 	const TimesUp = (function() {
+		const version = JSON.parse(window.localStorage.getItem('version'));
+		const teamsCount = Number.parseInt(window.localStorage.getItem('teamsCount'));
+		const wordsCount = Number.parseInt(window.localStorage.getItem('wordsCount'));
+		let roundsCount;
+		let gameDeck;
+		let hasImages;
+		let state;
+
 		let liveRegionElement;
 		let currentTurnTeamElement;
 		let teamsCountElement;
@@ -17,20 +25,20 @@
 		let timerElement;
 		let timerVisualElement;
 		let timerRemainingElement;
-		let state;
-		let timerHandle;
-		let timeIsUpSound;
-		let failedSound;
-		let succeedSound;
-		let stopSound;
-		let tickSound;
+
 		let previousActiveElement;
 		let dialog;
 		let dialogMask;
 		let dialogWindow;
 		let dialogOnCloseCallback;
 
-		const version = JSON.parse(window.localStorage.getItem('version'));
+		let timerHandle;
+
+		let timeIsUpSound;
+		let failedSound;
+		let succeedSound;
+		let stopSound;
+		let tickSound;
 
 		const roundRules = {
 			freeSpeech: {
@@ -54,6 +62,11 @@
 
 		function init(app) {
 			UI.queryAllElements();
+
+			roundsCount = version.rounds.length;
+			hasImages = version.hasImages;
+			gameDeck = GAME.createDeck(wordsCount);
+
 			STATE.init();
 			UI.setupBoard();
 
@@ -126,7 +139,6 @@
 			const {
 				currentRound,
 				teams,
-				roundsCount
 			} = state;
 
 			let message = `Fin de la manche ${currentRound.count}\n\n`;
@@ -151,7 +163,7 @@
 		}
 
 		function endOfGame() {
-			const totalScores = UTILS.computeRanks(state);
+			const totalScores = UTILS.computeRanks(roundsCount, state.teams);
 
 			message = 'Fin de la partie, voici le classement\n\n';
 
@@ -251,18 +263,10 @@
 		const STATE = {
 			init: function() {
 				const {rounds, timer} = version;
-				const teamsCount = Number.parseInt(window.localStorage.getItem('teamsCount'));
-				const wordsCount = Number.parseInt(window.localStorage.getItem('wordsCount'));
-				const roundsCount = rounds.length;
-				const gameDeck = GAME.createDeck(wordsCount);
 
 				state = {
-					roundsCount,
-					teamsCount,
 					currentWord: gameDeck[0],
-					gameDeck,
 					wordsToSucceed: [...gameDeck],
-					hasImages: version.hasImages,
 					currentRound: {
 						count: 1,
 						...roundRules[rounds[0]]
@@ -327,8 +331,8 @@
 				currentRound.rule = newRoundDetails.rule;
 				currentRound.wordSkipAllowed = newRoundDetails.wordSkipAllowed;
 
-				UTILS.shuffle(state.gameDeck);
-				state.wordsToSucceed = [...state.gameDeck];
+				UTILS.shuffle(gameDeck);
+				state.wordsToSucceed = [...gameDeck];
 				currentTurn.wordsToSucceedCount = state.wordsToSucceed.length;
 				state.currentWord = state.wordsToSucceed[0];
 			}
@@ -364,11 +368,9 @@
 			},
 			setupBoard: function() {
 				const {
-					hasImages,
 					currentTurn,
 					teams,
 					currentRound,
-					roundsCount,
 					currentWord,
 					timer
 				} = state;
@@ -494,7 +496,7 @@
 			createDeck: function(wordsCount) {
 				let deck;
 
-				if (version.hasImages) {
+				if (hasImages) {
 					deck = Object.keys(version.dictionary);	
 				} else {
 					deck = [...version.dictionary];
@@ -630,7 +632,7 @@
 					[array[i], array[j]] = [array[j], array[i]];
 				}
 			},
-			computeRanks: function({roundsCount, teams}) {
+			computeRanks: function(roundsCount, teams) {
 				const totalScores = {};
 
 				teams.forEach(function computeEndOfGameScores(team, index) {
