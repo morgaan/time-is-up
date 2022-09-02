@@ -11,6 +11,8 @@
 		let failedCountElement;
 		let wordElement;
 		let wordImageElement;
+		let succeedButtonElement;
+		let stopButtonElement;
 		let failedButtonElement;
 		let timerElement;
 		let timerVisualElement;
@@ -61,7 +63,7 @@
 
 			startOfRound();
 
-			UI.setupCustomEvents(app);
+			UI.setupEvents(app);
 		}
 
 		// ------------------ GAME STEPS  ---------------
@@ -345,6 +347,7 @@
 				succeedCountElement = app.querySelector('#succeedCount');
 				failedCountElement = app.querySelector('#failedCount');
 				wordElement = app.querySelector('#word');
+				succeedButtonElement = app.querySelector('#succeed');
 				failedButtonElement = app.querySelector('#failed');
 				stopButtonElement = app.querySelector('#stop');
 				timerElement = app.querySelector('#timer');
@@ -400,7 +403,15 @@
 					failedButtonElement.setAttribute('disabled', true);
 				}
 			},
-			setupCustomEvents: function(app) {
+			setupEvents: function(app) {
+				app.addEventListener('click', clickHandler);
+				app.addEventListener('updateTimer', updateTimerHandler);
+				app.addEventListener('wordSucceed', wordSucceedHandler);
+				app.addEventListener('wordFailed', wordFailedHandler);
+
+
+				// ---
+
 				function updateWord({newWord, dictionaryEntry}) {
 					if (wordImageElement) {
 						wordImageElement.src = `./images/${dictionaryEntry.img}`;
@@ -414,29 +425,56 @@
 					}
 				}
 
-				// New event on app
-				app.addEventListener('updateTimer', function updateTimerElement(event) {
+				function matchesButton(element, button) {
+					if (event.target.matches(`#${button.id}`)) {
+						return true;
+					} else if (event.target.closest('button').matches(`#${button.id}`)) {
+						// Handles the click on any children of the button (e.g. svg icon).
+						return true;
+					}
+					return false;
+				}
+
+				// --- Event handlers
+
+				function clickHandler (event) {
+					if (matchesButton(event, succeedButtonElement)) {
+						event.preventDefault();
+						onWordSucceed();
+					} else if (matchesButton(event, failedButtonElement)) {
+						event.preventDefault();
+						onWordFailed();
+					} else if (matchesButton(event, stopButtonElement)) {
+						event.preventDefault();
+						onStopTurn();
+					}
+					return;
+				}
+
+				function updateTimerHandler(event) {
 					const remaining = event.detail.remaining;
 					const percentage = Math.trunc((remaining * 100) / version.timer);
 					timerVisualElement.style.setProperty('--timer-visual-width', `${percentage}%`);
 					timerRemainingElement.innerHTML = `${remaining}&#8239;<span aria-label="second${remaining === 1 ? '' : 's'}">s</span>`;
-				});
-				app.addEventListener('wordSucceed', function updateSucceedCount(event) {
+				}
+
+				function wordSucceedHandler(event) {
 					const currentSucceedCount = new Number(succeedCountElement.textContent);
 					succeedCountElement.textContent = currentSucceedCount + 1;
 
 					if (event && event.detail) {
 						updateWord(event.detail);
 					}
-				});
-				app.addEventListener('wordFailed', function updateFailedCount(event) {
+				}
+
+				function wordFailedHandler(event) {
 					const currentFailedCount = new Number(failedCountElement.textContent);
 					failedCountElement.textContent = currentFailedCount + 1;
 
 					if (event && event.detail) {
 						updateWord(event.detail);
 					}
-				});
+				}
 			}
 		};	
 
@@ -617,10 +655,7 @@
 		};
 
 		return {
-			init,
-			onWordSucceed,
-			onWordFailed,
-			onStopTurn
+			init
 		};
 	})();
 
@@ -628,19 +663,4 @@
 
 	TimesUp.init(app);
 
-	app.querySelector('#succeed').addEventListener('click', function succeed(event) {
-		event.preventDefault();
-		TimesUp.onWordSucceed();
-	});
-
-	app.querySelector('#failed').addEventListener('click', function failed(event) {
-		event.preventDefault();
-		TimesUp.onWordFailed();
-	});
-
-	app.querySelector('#stop').addEventListener('click', function stop(event) {
-		event.preventDefault();
-
-		TimesUp.onStopTurn();
-	});
 })(window, document, undefined);
