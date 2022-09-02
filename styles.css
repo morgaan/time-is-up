@@ -77,8 +77,8 @@ figcaption {
 	grid-template-areas: "logo  logo  logo    stop"
 						 "timer timer timer   timer"
 						 "word  word  word    word"
-					     "skip  skip  succeed succeed"
-						 "round team  skipped guessed";
+					     "failed-button  failed-button  succeed-button succeed-button"
+						 "round team  failed succeed";
 
 	height: calc(100vh - .9rem);
 }
@@ -89,9 +89,9 @@ figcaption {
 		grid-gap: .5rem;
 		grid-template-columns: 20vw repeat(4, 1fr) 20vw;
 		grid-template-rows: 20vh auto 1fr;
-		grid-template-areas: "logo round team skipped guessed stop"
+		grid-template-areas: "logo round team failed succeed stop"
 							 "timer timer timer timer timer timer"
-							"skip  word word word word succeed";
+							"failed-button  word word word word succeed-button";
 		height: calc(100vh - 1rem);
 	}
 
@@ -116,12 +116,12 @@ figcaption {
 	grid-area: word;
 }
 
-.c-skip {
-	grid-area: skip;
+.c-failed-button {
+	grid-area: failed-button;
 }
 
-.c-succeed {
-	grid-area: succeed;
+.c-succeed-button {
+	grid-area: succeed-button;
 }
 
 .c-counters {
@@ -136,12 +136,12 @@ figcaption {
 	grid-area: team;
 }
 
-.c-skipped {
-	grid-area: skipped;
+.c-failed {
+	grid-area: failed;
 }
 
-.c-guessed {
-	grid-area: guessed;
+.c-succeed {
+	grid-area: succeed;
 }
 
 .c-timer {
@@ -239,7 +239,7 @@ figcaption {
 	margin: 0 auto;
 }
 
-.c-button--skip {
+.c-button--failed {
   background-color: #ff3c41;
   color: #35292c;
 }

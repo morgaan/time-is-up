@@ -1,3 +1,6 @@
+// TODO Fix issue, end of round does not update to next round
+// TODO Fix issue, visual timer is broken
+// TODO Swap alerts with dialogs
 (function(window, document, undefined) {
 	const TimesUp = (function() {
 		let liveRegionElement;
@@ -5,19 +8,20 @@
 		let teamsCountElement;
 		let currentRoundElement;
 		let roundsCountElement;
-		let currentTurnWordsToGuessElement;
-		let guessedCountElement;
-		let passedCountElement;
+		let currentTurnWordsToSucceedElement;
+		let succeedCountElement;
+		let failedCountElement;
 		let wordElement;
-		let skipButtonElement;
+		let wordImageElement;
+		let failedButtonElement;
 		let timerElement;
 		let timerVisualElement;
 		let timerRemainingElement;
 		let state;
 		let timerHandle;
 		let timeIsUpSound;
-		let skippedSound;
-		let guessedSound;
+		let failedSound;
+		let succeedSound;
 		let stopSound;
 		let tickSound;
 		let previousActiveElement;
@@ -31,239 +35,460 @@
 		const roundRules = {
 			freeSpeech: {
 				rule: `L'orateur parle librement et son équipe fait autant de propositions que nécessaire.`,
-				passingAllowed: false,
+				wordSkipAllowed: false,
 				shuffle: false
 			},
 			oneWord: {
 				rule: `L'orateur n'a le droit qu'à 1 mot et son équipe qu'à 1 proposition.`,
-				passingAllowed: true,
+				wordSkipAllowed: true,
 				shuffle: true
 			},
 			mimeAndSounds: {
 				rule: `L'orateur n'a le droit qu'aux mimes et aux bruitages et son équipe qu'à 1 proposition.`,
-				passingAllowed: true,
+				wordSkipAllowed: true,
 				shuffle: true
 			}
 		};
 
-		// Fisher-Yates shuffle. (https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle)
-		function shuffle(array) {
-			for (let i = array.length - 1; i > 0; i--) {
-				let j = Math.floor(Math.random() * (i + 1));
-				[array[i], array[j]] = [array[j], array[i]];
-			}
-		}
+		// ------------------ INIT  ---------------
 
-		// Temporary until implementation of dialog.
-		function resetTimeIsUpSound() {
-			tickSound.play();
-			tickSound.pause();
-			tickSound.currentTime = 0;
-			timeIsUpSound.play();
-			timeIsUpSound.pause();
-			timeIsUpSound.currentTime = 0;
-		}
-
-		function createGameDeck(wordsCount) {
-			let deck;
-
-			if (version.hasImages) {
-				deck = Object.keys(version.dictionary);	
-			} else {
-				deck = [...version.dictionary];
-			}
-
-			shuffle(deck);
-
-			deck = deck.splice(0, wordsCount);
-
-			return deck;
-		}
-
-		function initState() {
-			const {rounds, timer} = version;
-			const teamsCount = Number.parseInt(window.localStorage.getItem('teamsCount'));
-			const wordsCount = Number.parseInt(window.localStorage.getItem('wordsCount'));
-			const roundsCount = rounds.length;
-			const gameDeck = createGameDeck(wordsCount);
-
-			state = {
-				roundsCount,
-				teamsCount,
-				currentWord: gameDeck[0],
-				gameDeck,
-				wordsToGuess: [...gameDeck],
-				hasImages: version.hasImages,
-				currentRound: {
-					count: 1,
-					...roundRules[rounds[0]]
-				},
-				currentTurn: {
-					team: 1,
-					wordsGuessed : [],
-					wordsPassed : [],
-					wordsToGuessCount: gameDeck.length
-				},
-				timer: {
-					end: null,
-					remaining: timer,
-					max: timer
-				}
-			};
-
-			const teams = [];
-
-			for (i = 0; i < teamsCount; i++) {
-				const pointsPerRound = [];
-		
-				for (j = 0; j < roundsCount; j++) {
-					pointsPerRound.push(0);
-				}
-
-				teams.push({
-					wordsGuessed: [],
-					pointsPerRound
-				});
-			}
-
-			state.teams = teams;
-		}
-			
 		function init(app) {
-			liveRegionElement = document.querySelector('#live-region');
-			currentTurnTeamElement = app.querySelector('#currentTurnTeam');
-			teamsCountElement = app.querySelector('#teamsCount');
-			currentRoundElement = app.querySelector('#currentRound');
-			roundsCountElement = app.querySelector('#roundsCount');
-			currentTurnWordsToGuessElement = app.querySelector('#currentTurnWordsToGuessedCount');
-			guessedCountElement = app.querySelector('#guessedCount');
-			passedCountElement = app.querySelector('#passedCount');
-			wordElement = app.querySelector('#word');
-			skipButtonElement = app.querySelector('#skip');
-			stopButtonElement = app.querySelector('#stop');
-			timerElement = app.querySelector('#timer');
-			timerVisualElement = timerElement.querySelector('#timer-visual');
-			timerRemainingElement = timerElement.querySelector('#timer-remaining');
-			timeIsUpSound = document.querySelector('#time-is-up-sound');
-			skippedSound = document.querySelector('#skipped-sound');
-			guessedSound = document.querySelector('#guessed-sound');
-			stopSound = document.querySelector('#stop-sound');
-			tickSound = document.querySelector('#tick-sound');
-			dialog = document.querySelector('#dialog');
-			dialogMask = dialog.querySelector('#dialog-mask');
-			dialogWindow = dialog.querySelector('#dialog-window');
+			UI.queryAllElements();
+			STATE.init();
+			UI.setupBoard();
 
-			initState();
-
-			const {
-				hasImages,
-				currentTurn,
-				teams,
-				currentRound,
-				roundsCount,
-				currentWord,
-				timer
-			} = state;
-
-			currentTurnTeamElement.innerText = currentTurn.team;
-			teamsCountElement.innerText = teams.length;
-			currentRoundElement.innerText = currentRound.count;
-			roundsCountElement.innerText = roundsCount;
-			guessedCountElement.innerText = currentTurn.wordsGuessed.length;
-			currentTurnWordsToGuessElement.innerText = currentTurn.wordsToGuessCount;
-			passedCountElement.innerText = currentTurn.wordsPassed.length;
-			timerRemainingElement.innerHTML = `${timer.remaining}&#8239;<span aria-label="seconds">s</span>`
-
-			if (hasImages) {
-				const dictionaryEntry = version.dictionary[currentWord];
-				const imgElement = document.createElement('img');
-				imgElement.id = 'image';
-				imgElement.classList.add('c-word__image');
-				imgElement.src = `./images/${dictionaryEntry.img}`;
-				imgElement.alt = `${currentWord}${currentWord !== dictionaryEntry.desc ? `: ${dictionaryEntry.desc}` : currentWord}`;
-				wordElement.appendChild(imgElement);
-			}
-
-			if (!currentRound.passingAllowed) {
-				skipButtonElement.setAttribute('disabled', true);
-			}
-
+			// Swaps Loading... with the actual app.
 			app.removeAttribute('style');
 			liveRegionElement.setAttribute('class', 'sr-only');
 
 			startOfRound();
 
-			guessedCountElement.addEventListener('wordGuessed', function updateGuessedCount() {
-				const currentGuessedCount = new Number(this.textContent);
-				this.textContent = currentGuessedCount + 1;
-			});
+			UI.setupCustomEvents(app);
+		}
 
-			passedCountElement.addEventListener('wordPassed', function updatePassedCount() {
-				const currentPassedCount = new Number(this.textContent);
-				this.textContent = currentPassedCount + 1;
-			});
+		// ------------------ GAME STEPS  ---------------
 
-			currentRoundElement.addEventListener('newRound', function updateCurrentRound(event) {
-				this.textContent = event.detail.count;
-			});
+		function endOfTurn() {
+			stopTimer();
 
-			guessedCountElement.addEventListener('reset', function updateGuessedCount() {
-				this.textContent = 0;
-			});
+			const {rounds} = version;
+			const {
+				wordsToSucceed,
+				currentRound,
+				currentTurn,
+			} = state;
 
-			passedCountElement.addEventListener('reset', function updatePassedCount() {
-				this.textContent = 0;
-			});
+			STATE.nextTeam();
 
-			currentTurnWordsToGuessElement.addEventListener('update', function updateCurrentTurnWordsToGuess(event) {
-				this.textContent = event.detail.newCount;
-			});
+			// Resets to move to next turn.
+			if (currentTurn.wordsFailed.length > 0) {
+				wordsToSucceed.push(...currentTurn.wordsFailed);
+			}
+			state.currentTurn.wordsSucceed = [];
+			state.currentTurn.wordsFailed = [];
 
-			skipButtonElement.addEventListener('newRound', function updatePassButton(event) {
-				if (event.detail.passingAllowed) {
-					skipButtonElement.removeAttribute('disabled');
-					return;
+			if (wordsToSucceed.length > 0) {
+				const roundName = rounds[currentRound.count-1];
+				const roundDetails = roundRules[roundName];
+
+				if (roundDetails.shuffle) {
+					UTILS.shuffle(state.wordsToSucceed);
+					state.currentWord = state.wordsToSucceed[0];
 				}
-				skipButtonElement.setAttribute('disabled', true);
+				currentTurn.wordsToSucceedCount = wordsToSucceed.length;
+
+				alert(`Au tour de l'équipe ${currentTurn.team}`);
+
+				UI.setupBoard();
+
+				startTimer();
+			} else {
+				endOfRound();
+			}
+		}
+
+		function startOfRound() {
+			const {
+				currentRound
+			} = state;
+
+			let message = `Rappel de la règle:<br>${currentRound.rule}<br><br>`;
+			message += `C'est au tour de l'équipe ${state.currentTurn.team}`;
+
+			infoDialog(`Début de la manche ${currentRound.count}`, message, 'Commençer !', function startTimerCallback() {
+				AUDIO.setupSound(tickSound);
+				AUDIO.setupSound(timeIsUpSound);
+				startTimer();
+			});
+		}
+
+		function endOfRound() {
+			const {
+				currentRound,
+				teams,
+				roundsCount
+			} = state;
+
+			let message = `Fin de la manche ${currentRound.count}\n\n`;
+
+			teams.forEach(function appendEndOfRoundMessage(team, index) {
+				const score = team.pointsPerRound[currentRound.count-1];
+				message += `L'équipe ${index+1} a marqué ${score} point${score > 1 ? 's' : ''}\n`;
 			});
 
-			wordElement.addEventListener('draw', function updateWordElement(event) {
-				const {
-					dictionaryEntry,
-					newWord
-				} = event.detail;
+			alert(message);
 
-				const imgElement = this.querySelector('#image');
+			if (currentRound.count === roundsCount) {
+				endOfGame();
+			} else {
+				STATE.nextRound();
 
-				if (imgElement) {
-					imgElement.src = `./images/${dictionaryEntry.img}`;
-					imgElement.alt = `${newWord}${newWord !== dictionaryEntry.desc ? `: ${dictionaryEntry.desc}` : newWord}`;
+				if (currentRound.count !== roundsCount) {
+					startOfRound();
 				}
+			}
+		}
+
+		function endOfGame() {
+			const totalScores = UTILS.computeRanks(state);
+
+			message = 'Fin de la partie, voici le classement\n\n';
+
+			Object.keys(totalScores).forEach(function appendEndOfGameMessage(team, index) {
+				message += `#${index+1} ${team} avec ${totalScores[team]} point${totalScores[team] > 1 ? 's' : ''}\n`
 			});
 
-			liveRegionElement.addEventListener('draw', function updateLiveRegionElementWithNextWord(event) {
-				const {
-					dictionaryEntry,
-					newWord
-				} = event.detail;
+			alert(message);
 
-				if (hasImages) {
-					this.innerText = `Le nouveau mot est ${newWord}${newWord !== dictionaryEntry.desc ? `, l'image associée contient ${dictionaryEntry.desc}` : ''}`;
+			location.href = '/index.html';
+		}
+
+
+		// ------------------ USER INTERACTIONS  ---------------
+
+		function onWordFailed() {
+			const {
+				currentTurn,
+				wordsToSucceed
+			} = state;
+			const succeedWordsCount = currentTurn.wordsSucceed.length;
+
+			wordsToSucceed.shift();
+			currentTurn.wordsFailed.push(state.currentWord);
+
+			const failedWordsCount = currentTurn.wordsFailed.length;
+			const totalPlayed = (succeedWordsCount + failedWordsCount);
+
+			if (totalPlayed === currentTurn.wordsToSucceedCount) {
+				app.dispatchEvent(new CustomEvent('wordFailed'));
+			} else if (totalPlayed < currentTurn.wordsToSucceedCount) {
+				const newWord = state.wordsToSucceed[0];
+				state.currentWord = newWord;
+
+				app.dispatchEvent(new CustomEvent('wordFailed', {
+					detail: {
+						dictionaryEntry: version.dictionary[newWord],
+						newWord
+					}
+				}));
+			}
+
+			failedSound.currentTime = 0;
+			failedSound.play();
+
+			if (totalPlayed === currentTurn.wordsToSucceedCount) {
+				endOfTurn();
+				return;
+			}
+		}
+
+		function onWordSucceed() {
+			const {
+				currentTurn,
+				wordsToSucceed
+			} = state;
+			const failedWordsCount = currentTurn.wordsFailed.length;
+
+			wordsToSucceed.shift();
+			currentTurn.wordsSucceed.push(state.currentWord);
+
+			const succeedWordsCount = currentTurn.wordsSucceed.length;
+			const totalPlayed = (succeedWordsCount + failedWordsCount);
+
+			if (totalPlayed === currentTurn.wordsToSucceedCount) {
+				app.dispatchEvent(new CustomEvent('wordSucceed'));
+			} else if (totalPlayed < currentTurn.wordsToSucceedCount) {
+				const newWord = state.wordsToSucceed[0];
+				state.currentWord = newWord;
+
+				app.dispatchEvent(new CustomEvent('wordSucceed', {
+					detail: {
+						dictionaryEntry: version.dictionary[newWord],
+						newWord
+					}
+				}));
+			}
+
+			succeedSound.currentTime = 0;
+			succeedSound.play();
+
+			if (totalPlayed === currentTurn.wordsToSucceedCount) {
+				endOfTurn();
+				return;
+			}
+		}
+
+		function onStopTurn() {
+			stopSound.currentTime = 0;
+			stopSound.play();
+
+			endOfTurn();
+		}
+
+		// -------------------- STATE ----------------------
+
+		const STATE = {
+			init: function() {
+				const {rounds, timer} = version;
+				const teamsCount = Number.parseInt(window.localStorage.getItem('teamsCount'));
+				const wordsCount = Number.parseInt(window.localStorage.getItem('wordsCount'));
+				const roundsCount = rounds.length;
+				const gameDeck = GAME.createDeck(wordsCount);
+
+				state = {
+					roundsCount,
+					teamsCount,
+					currentWord: gameDeck[0],
+					gameDeck,
+					wordsToSucceed: [...gameDeck],
+					hasImages: version.hasImages,
+					currentRound: {
+						count: 1,
+						...roundRules[rounds[0]]
+					},
+					currentTurn: {
+						team: 1,
+						wordsSucceed : [],
+						wordsFailed : [],
+						wordsToSucceedCount: gameDeck.length
+					},
+					timer: {
+						end: null,
+						remaining: timer,
+						max: timer
+					}
+				};
+
+				const teams = [];
+
+				for (i = 0; i < teamsCount; i++) {
+					const pointsPerRound = [];
+			
+					for (j = 0; j < roundsCount; j++) {
+						pointsPerRound.push(0);
+					}
+
+					teams.push({
+						wordsSucceed: [],
+						pointsPerRound
+					});
+				}
+
+				state.teams = teams;
+			},
+			nextTeam: function () {
+				const {
+					currentRound,
+					currentTurn,
+					teams
+				} = state;
+				const roundOfCurrentTeam = teams[currentTurn.team-1];
+
+				roundOfCurrentTeam.pointsPerRound[currentRound.count-1] = roundOfCurrentTeam.pointsPerRound[currentRound.count-1] + currentTurn.wordsSucceed.length;
+				roundOfCurrentTeam.wordsSucceed.push(currentTurn.wordsSucceed);
+
+				if (currentTurn.team === teams.length) {
+					state.currentTurn.team = 1;
 				} else {
-					this.innerText = `Le nouveau mot est ${newWord}`;
+					state.currentTurn.team++;
 				}
-			});
+			},
+			nextRound: function () {
+				const {rounds} = version;
+				const {
+					currentRound,
+					currentTurn
+				} = state;
 
-			currentTurnTeamElement.addEventListener('newTeam', function updateTeamCount(event) {
-				this.textContent = event.detail.newTeam;
-			});
+				currentRound.count++;
+				const newRoundName = rounds[currentRound.count-1];
+				const newRoundDetails = roundRules[newRoundName];
+				currentRound.rule = newRoundDetails.rule;
+				currentRound.wordSkipAllowed = newRoundDetails.wordSkipAllowed;
 
-			timerElement.addEventListener('update', function updateTimerElement(event) {
-				const remaining = event.detail.remaining;
-				const percentage = Math.trunc((remaining * 100)/version.timer);
-				timerVisualElement.style.setProperty('--timer-visual-width', `${percentage}%`);
-				timerRemainingElement.innerHTML = `${remaining}&#8239;<span aria-label="second${remaining === 1 ? '' : 's'}">s</span>`;
-			});
+				UTILS.shuffle(state.gameDeck);
+				state.wordsToSucceed = [...state.gameDeck];
+				currentTurn.wordsToSucceedCount = state.wordsToSucceed.length;
+				state.currentWord = state.wordsToSucceed[0];
+			}
+		};
+
+		// -------------------- UI ------------------------
+
+		const UI = {
+			queryAllElements: function() {
+				liveRegionElement = document.querySelector('#live-region');
+				currentTurnTeamElement = app.querySelector('#currentTurnTeam');
+				teamsCountElement = app.querySelector('#teamsCount');
+				currentRoundElement = app.querySelector('#currentRound');
+				roundsCountElement = app.querySelector('#roundsCount');
+				currentTurnWordsToSucceedElement = app.querySelector('#currentTurnWordsToSucceedCount');
+				succeedCountElement = app.querySelector('#succeedCount');
+				failedCountElement = app.querySelector('#failedCount');
+				wordElement = app.querySelector('#word');
+				failedButtonElement = app.querySelector('#failed');
+				stopButtonElement = app.querySelector('#stop');
+				timerElement = app.querySelector('#timer');
+				timerVisualElement = timerElement.querySelector('#timer-visual');
+				timerRemainingElement = timerElement.querySelector('#timer-remaining');
+				timeIsUpSound = document.querySelector('#time-is-up-sound');
+				failedSound = document.querySelector('#failed-sound');
+				succeedSound = document.querySelector('#succeed-sound');
+				stopSound = document.querySelector('#stop-sound');
+				tickSound = document.querySelector('#tick-sound');
+				dialog = document.querySelector('#dialog');
+				dialogMask = dialog.querySelector('#dialog-mask');
+				dialogWindow = dialog.querySelector('#dialog-window');
+			},
+			setupBoard: function() {
+				const {
+					hasImages,
+					currentTurn,
+					teams,
+					currentRound,
+					roundsCount,
+					currentWord,
+					timer
+				} = state;
+				const dictionaryEntry = version.dictionary[currentWord];
+
+				currentTurnTeamElement.innerText = currentTurn.team;
+				teamsCountElement.innerText = teams.length;
+				currentRoundElement.innerText = currentRound.count;
+				roundsCountElement.innerText = roundsCount;
+				succeedCountElement.innerText = currentTurn.wordsSucceed.length;
+				currentTurnWordsToSucceedElement.innerText = currentTurn.wordsToSucceedCount;
+				failedCountElement.innerText = currentTurn.wordsFailed.length;
+				timerVisualElement.style.setProperty('--timer-visual-width', `100%`);
+				timerRemainingElement.innerHTML = `${timer.max}&#8239;<span aria-label="seconds">s</span>`
+
+				if (hasImages && !wordImageElement) {
+					const imgElement = document.createElement('img');
+					imgElement.id = 'image';
+					imgElement.classList.add('c-word__image');
+					imgElement.src = `./images/${dictionaryEntry.img}`;
+					imgElement.alt = `${currentWord}${currentWord !== dictionaryEntry.desc ? `: ${dictionaryEntry.desc}` : currentWord}`;
+					wordElement.appendChild(imgElement);
+					wordImageElement = wordElement.querySelector('img');
+				} else if (hasImage && wordImageElement) {
+					wordImageElement.src = `./images/${dictionaryEntry.img}`;
+					wordImageElement.alt = `${currentWord}${currentWord !== dictionaryEntry.desc ? `: ${dictionaryEntry.desc}` : currentWord}`;
+				}
+
+				if (!currentRound.wordSkipAllowed) {
+					failedButtonElement.setAttribute('disabled', true);
+				}
+			},
+			setupCustomEvents: function(app) {
+				function updateWord({newWord, dictionaryEntry}) {
+					if (wordImageElement) {
+						wordImageElement.src = `./images/${dictionaryEntry.img}`;
+						wordImageElement.alt = `${newWord}${newWord !== dictionaryEntry.desc ? `: ${dictionaryEntry.desc}` : newWord}`;
+
+						liveRegionElement.innerText = `Le nouveau mot est ${newWord}${newWord !== dictionaryEntry.desc ? `, l'image associée contient ${dictionaryEntry.desc}` : ''}`;
+					}
+					else {
+						wordElement.innerText = newWord;
+						liveRegionElement.innerText = `Le nouveau mot est ${newWord}`;
+					}
+				}
+
+				// New event on app
+				app.addEventListener('updateTimer', function updateTimerElement(event) {
+					const remaining = event.detail.remaining;
+					const percentage = Math.trunc((remaining * 100) / version.timer);
+					timerVisualElement.style.setProperty('--timer-visual-width', `${percentage}%`);
+					timerRemainingElement.innerHTML = `${remaining}&#8239;<span aria-label="second${remaining === 1 ? '' : 's'}">s</span>`;
+				});
+				app.addEventListener('wordSucceed', function updateSucceedCount(event) {
+					const currentSucceedCount = new Number(succeedCountElement.textContent);
+					succeedCountElement.textContent = currentSucceedCount + 1;
+
+					if (event && event.detail) {
+						updateWord(event.detail);
+					}
+				});
+				app.addEventListener('wordFailed', function updateFailedCount(event) {
+					const currentFailedCount = new Number(failedCountElement.textContent);
+					failedCountElement.textContent = currentFailedCount + 1;
+
+					if (event && event.detail) {
+						updateWord(event.detail);
+					}
+				});
+			}
+		};	
+
+		// -------------------- AUDIO ------------------
+
+		const AUDIO = {
+			setupSound: function(sound) {
+				sound.play();
+				sound.pause();
+				sound.currentTime = 0;
+			}
+		};
+
+		// -------------------- GAME ------------------
+
+		const GAME = {
+			createDeck: function(wordsCount) {
+				let deck;
+
+				if (version.hasImages) {
+					deck = Object.keys(version.dictionary);	
+				} else {
+					deck = [...version.dictionary];
+				}
+
+				UTILS.shuffle(deck);
+
+				deck = deck.splice(0, wordsCount);
+
+				return deck;
+			}
+		};
+
+		// ----------------- TIMER ------------------
+
+		function startTimer() {
+			const {
+				timer
+			} = state;
+
+			timer.remaining = timer.max;
+
+			const now = new Date().getTime();
+			timer.end = now + (timer.remaining * 1000);
+			timer.remaining--;
+
+			timerRemainingElement.innerHTML = `${timer.remaining}&#8239;<span aria-label="seconds">s</span>`
+
+			timerHandle = setInterval(countdown, 1000);
+		}
+
+		function stopTimer() {
+			clearInterval(timerHandle);
 		}
 
 		function countdown() {
@@ -293,85 +518,7 @@
 			}
 		}
 
-		function onWordSkipped() {
-			const {
-				currentTurn,
-				wordsToGuess
-			} = state;
-			const guessedWordsCount = currentTurn.wordsGuessed.length;
-
-			wordsToGuess.shift();
-			currentTurn.wordsPassed.push(state.currentWord);
-
-			const passedWordsCount = currentTurn.wordsPassed.length;
-			const totalPlayed = (guessedWordsCount + passedWordsCount);
-
-			if (totalPlayed <= currentTurn.wordsToGuessCount) {
-				passedCountElement.dispatchEvent(new CustomEvent('wordPassed'));
-			}
-	
-			if (totalPlayed < currentTurn.wordsToGuessCount) {
-				draw();
-			}
-			skippedSound.currentTime = 0;
-			skippedSound.play();
-
-			if (totalPlayed === currentTurn.wordsToGuessCount) {
-				endOfTurn();
-				return;
-			}
-		}
-
-		function onWordGuessed() {
-			const {
-				currentTurn,
-				wordsToGuess
-			} = state;
-			const passedWordsCount = currentTurn.wordsPassed.length;
-
-			wordsToGuess.shift();
-			currentTurn.wordsGuessed.push(state.currentWord);
-
-			const guessedWordsCount = currentTurn.wordsGuessed.length;
-			const totalPlayed = (guessedWordsCount + passedWordsCount);
-
-			if (totalPlayed <= currentTurn.wordsToGuessCount) {
-				guessedCountElement.dispatchEvent(new CustomEvent('wordGuessed'));
-			}
-
-			if (totalPlayed < currentTurn.wordsToGuessCount) {
-				draw();
-			}
-			guessedSound.currentTime = 0;
-			guessedSound.play();
-
-			if (totalPlayed === currentTurn.wordsToGuessCount) {
-				endOfTurn();
-				return;
-			}
-		}
-
-		function onStopTurn() {
-			stopSound.currentTime = 0;
-			stopSound.play();
-
-			endOfTurn();
-		}
-
-		function draw() {
-			const newWord = state.wordsToGuess[0];
-			state.currentWord = newWord;
-
-			const drawEvent = new CustomEvent('draw', {
-				detail: {
-					dictionaryEntry: version.dictionary[newWord],
-					newWord
-				}
-			});
-
-			wordElement.dispatchEvent(drawEvent);
-			liveRegionElement.dispatchEvent(drawEvent);
-		}
+		// ----------------- DIALOG ------------------
 
 		function infoDialog(title, content, buttonLabel, callback) {
 			dialogWindow.querySelector('#dialog-title').textContent = title;
@@ -433,221 +580,45 @@
 			dialogOnCloseCallback = null;
 		}
 
-		function endOfTurn() {
-			updateTeam();
 
-			const {rounds} = version;
-			const {
-				wordsToGuess,
-				currentRound,
-				currentTurn,
-				timer
-			} = state;
+		// ----------------- UTILS ------------------
 
-
-			if (currentTurn.wordsPassed.length > 0) {
-				wordsToGuess.push(...currentTurn.wordsPassed);
-			}
-
-			state.currentTurn.wordsGuessed = [];
-			state.currentTurn.wordsPassed = [];
-
-			if (wordsToGuess.length > 0) {
-				const roundName = rounds[currentRound.count-1];
-				const roundDetails = roundRules[roundName];
-
-				if (roundDetails.shuffle) {
-					shuffle(state.wordsToGuess);
-					draw();
+		const UTILS = {
+			shuffle: function(array) {
+				// Fisher-Yates shuffle. (https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle)
+				for (let i = array.length - 1; i > 0; i--) {
+					let j = Math.floor(Math.random() * (i + 1));
+					[array[i], array[j]] = [array[j], array[i]];
 				}
-				currentTurn.wordsToGuessCount = wordsToGuess.length;
-				currentTurnWordsToGuessElement.dispatchEvent(new CustomEvent('update', {
-					detail: {
-						newCount: wordsToGuess.length
+			},
+			computeRanks: function({roundsCount, teams}) {
+				const totalScores = {};
+
+				teams.forEach(function computeEndOfGameScores(team, index) {
+					let totalScore = 0;
+					for (let i = 0; i < roundsCount; i++) {
+						totalScore += team.pointsPerRound[i];
 					}
-				}));
+					totalScores[`Equipe ${index+1}`] = totalScore;
+				}, {});
 
-				alert(`Au tour de l'équipe ${currentTurn.team}`);
+				Object.entries(totalScores).sort(function compareScore(a, b) {
+					if (a[1] < b[1]) {
+						return -1;
+					} else if (a[1] > b[1]) {
+						return 1;
+					}
+					return 0;
+				});
 
-				startTimer();
-			} else {
-				endOfRound();
+				return totalScores;
 			}
-
-			timerElement.dispatchEvent(new CustomEvent('update', {
-				detail: {
-					remaining: timer.max
-				}
-			}));
-			guessedCountElement.dispatchEvent(new CustomEvent('reset'));
-			passedCountElement.dispatchEvent(new CustomEvent('reset'));
-
-			currentTurnTeamElement.dispatchEvent(new CustomEvent('newTeam', {
-				detail: {
-					newTeam: currentTurn.team
-				}
-			}));
-		}
-
-
-		function startTimer() {
-			const {
-				timer
-			} = state;
-
-			timer.remaining = timer.max;
-
-			const now = new Date().getTime();
-			timer.end = now + (timer.remaining * 1000);
-			timer.remaining--;
-
-			timerRemainingElement.innerHTML = `${timer.remaining}&#8239;<span aria-label="seconds">s</span>`
-
-			timerHandle = setInterval(countdown, 1000);
-		}
-
-		function startOfRound() {
-			const {
-				currentRound,
-			} = state;
-
-			let message = `Rappel de la règle:<br>${currentRound.rule}<br><br>`;
-			message += `C'est au tour de l'équipe ${state.currentTurn.team}`;
-
-			infoDialog(`Début de la manche ${currentRound.count}`, message, 'Commençer !', function startTimerCallback() {
-				resetTimeIsUpSound();
-				startTimer();
-			});
-
-		}
-
-		function endOfRound() {
-			const {
-				currentRound,
-				teams,
-				roundsCount
-			} = state;
-
-			let message = `Fin de la manche ${currentRound.count}\n\n`;
-
-			teams.forEach(function appendEndOfRoundMessage(team, index) {
-				const score = team.pointsPerRound[currentRound.count-1];
-				message += `L'équipe ${index+1} a marqué ${score} point${score > 1 ? 's' : ''}\n`;
-			});
-
-			alert(message);
-
-			if (currentRound.count === roundsCount) {
-				endOfGame();
-			} else {
-				updateRound();
-			}
-		}
-
-		function endOfGame() {
-			const totalScores = computeRanks();
-
-			message = 'Fin de la partie, voici le classement\n\n';
-
-			Object.keys(totalScores).forEach(function appendEndOfGameMessage(team, index) {
-				message += `#${index+1} ${team} avec ${totalScores[team]} point${totalScores[team] > 1 ? 's' : ''}\n`
-			});
-
-			alert(message);
-
-			location.href = '/index.html';
-		}
-
-		function updateRound() {
-			const {rounds} = version;
-			const {
-				currentRound,
-				currentTurn
-			} = state;
-
-			currentRound.count++;
-			const newRoundName = rounds[currentRound.count-1];
-			const newRoundDetails = roundRules[newRoundName];
-			currentRound.rule = newRoundDetails.rule;
-			currentRound.passingAllowed = newRoundDetails.passingAllowed;
-
-			const newRoundEvent = new CustomEvent('newRound', {
-				detail: {
-					count: currentRound.count,
-					...newRoundDetails
-				}
-			});
-
-			if (currentRound.count !== roundsCount) {
-				startOfRound();
-			}
-
-			shuffle(state.gameDeck);
-			state.wordsToGuess = [...state.gameDeck];
-
-			currentRoundElement.dispatchEvent(newRoundEvent);
-			skipButtonElement.dispatchEvent(newRoundEvent);
-
-			guessedCountElement.dispatchEvent(new CustomEvent('reset'));
-			currentTurn.wordsToGuessCount = state.wordsToGuess.length;
-			currentTurnWordsToGuessElement.dispatchEvent(new CustomEvent('update', {
-				detail: {
-					newCount: state.wordsToGuess.length
-				}
-			}));
-			draw();
-		}
-
-		function updateTeam() {
-			const {
-				currentRound,
-				currentTurn,
-				teams
-			} = state;
-			const roundOfCurrentTeam = teams[currentTurn.team-1];
-
-			roundOfCurrentTeam.pointsPerRound[currentRound.count-1] = roundOfCurrentTeam.pointsPerRound[currentRound.count-1] + currentTurn.wordsGuessed.length;
-			roundOfCurrentTeam.wordsGuessed.push(currentTurn.wordsGuessed);
-
-			if (currentTurn.team === teams.length) {
-				state.currentTurn.team = 1;
-			} else {
-				state.currentTurn.team++;
-			}
-		}
-
-		function computeRanks() {
-			const {
-				roundsCount,
-				teams
-			} = state;
-
-			const totalScores = {};
-
-			teams.forEach(function computeEndOfGameScores(team, index) {
-				let totalScore = 0;
-				for (let i = 0; i < roundsCount; i++) {
-					totalScore += team.pointsPerRound[i];
-				}
-				totalScores[`Equipe ${index+1}`] = totalScore;
-			}, {});
-
-			Object.entries(totalScores).sort(function compareScore(a, b) {
-				if (a[1] < b[1]) {
-					return -1;
-				} else if (a[1] > b[1]) {
-					return 1;
-				}
-				return 0;
-			});
-
-			return totalScores;
-		}
+		};
 
 		return {
 			init,
-			onWordGuessed,
-			onWordSkipped,
+			onWordSucceed,
+			onWordFailed,
 			onStopTurn
 		};
 	})();
@@ -658,12 +629,12 @@
 
 	app.querySelector('#succeed').addEventListener('click', function succeed(event) {
 		event.preventDefault();
-		TimesUp.onWordGuessed();
+		TimesUp.onWordSucceed();
 	});
 
-	app.querySelector('#skip').addEventListener('click', function skip(event) {
+	app.querySelector('#failed').addEventListener('click', function failed(event) {
 		event.preventDefault();
-		TimesUp.onWordSkipped();
+		TimesUp.onWordFailed();
 	});
 
 	app.querySelector('#stop').addEventListener('click', function stop(event) {
