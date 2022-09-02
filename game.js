@@ -69,6 +69,7 @@
 
 			STATE.init();
 			UI.setupBoard();
+			STATE.proxify();
 
 			// Swaps Loading... with the actual app.
 			app.removeAttribute('style');
@@ -301,6 +302,46 @@
 
 				state.teams = teams;
 			},
+			proxify: function () {
+				state = new Proxy(state, proxyHandler(state));
+
+				function proxyHandler(data) {
+					return {
+						get: function(obj, prop) {
+							if (prop === '_isProxy') {
+								return true;
+							}
+
+							if (['object', 'array'].includes(Object.prototype.toString.call(obj[prop]).slice(8, -1).toLowerCase()) && !obj[prop]._isProxy) {
+								obj[prop] = new Proxy(obj[prop], proxyHandler(data));
+							}
+
+							return obj[prop];
+						},
+						set: function(obj, prop, newValue) {
+							console.log(`setting ${prop} with`, newValue);
+
+							if (obj[prop] === newValue) {
+								return true;
+							}
+
+							if (prop === 'currentWord') {
+								const dictionaryEntry = version.dictionary[newValue];
+
+								obj[prop] = newValue;
+								UI.updateWord(newValue, dictionaryEntry);
+
+								return true;
+							}
+
+							if (prop === 'currentWord') {
+							}
+
+							return Reflect.set(...arguments);
+						}
+					};
+				};
+			},
 			nextTeam: function () {
 				const {
 					currentRound,
@@ -405,6 +446,18 @@
 					failedButtonElement.setAttribute('disabled', true);
 				}
 			},
+			updateWord: function(newWord, dictionaryEntry) {
+				if (wordImageElement) {
+					wordImageElement.src = `./images/${dictionaryEntry.img}`;
+					wordImageElement.alt = `${newWord}${newWord !== dictionaryEntry.desc ? `: ${dictionaryEntry.desc}` : newWord}`;
+
+					liveRegionElement.innerText = `Le nouveau mot est ${newWord}${newWord !== dictionaryEntry.desc ? `, l'image associée contient ${dictionaryEntry.desc}` : ''}`;
+				}
+				else {
+					wordElement.innerText = newWord;
+					liveRegionElement.innerText = `Le nouveau mot est ${newWord}`;
+				}
+			},
 			setupEvents: function(app) {
 				app.addEventListener('click', clickHandler);
 				app.addEventListener('updateTimer', updateTimerHandler);
@@ -413,19 +466,6 @@
 
 
 				// ---
-
-				function updateWord({newWord, dictionaryEntry}) {
-					if (wordImageElement) {
-						wordImageElement.src = `./images/${dictionaryEntry.img}`;
-						wordImageElement.alt = `${newWord}${newWord !== dictionaryEntry.desc ? `: ${dictionaryEntry.desc}` : newWord}`;
-
-						liveRegionElement.innerText = `Le nouveau mot est ${newWord}${newWord !== dictionaryEntry.desc ? `, l'image associée contient ${dictionaryEntry.desc}` : ''}`;
-					}
-					else {
-						wordElement.innerText = newWord;
-						liveRegionElement.innerText = `Le nouveau mot est ${newWord}`;
-					}
-				}
 
 				function matchesButton(element, button) {
 					if (event.target.matches(`#${button.id}`)) {
@@ -463,19 +503,11 @@
 				function wordSucceedHandler(event) {
 					const currentSucceedCount = new Number(succeedCountElement.textContent);
 					succeedCountElement.textContent = currentSucceedCount + 1;
-
-					if (event && event.detail) {
-						updateWord(event.detail);
-					}
 				}
 
 				function wordFailedHandler(event) {
 					const currentFailedCount = new Number(failedCountElement.textContent);
 					failedCountElement.textContent = currentFailedCount + 1;
-
-					if (event && event.detail) {
-						updateWord(event.detail);
-					}
 				}
 			}
 		};	
