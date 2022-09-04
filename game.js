@@ -33,6 +33,7 @@
 		let dialogOnCloseCallback;
 
 		let timerHandle;
+		let timerEnd = null;
 
 		let timeIsUpSound;
 		let failedSound;
@@ -289,9 +290,11 @@
 				// Do not neeed really
 				//
 				// wordsToSucceedCount
+				// timerEnd
 
 				state = {
 					wordUnderGuess: gameDeck[0],
+					timerRemaining: timer,
 					wordsToSucceed: [...gameDeck],
 					currentRound: {
 						count: 1,
@@ -301,11 +304,6 @@
 						team: 1,
 						wordsSucceed : [],
 						wordsFailed : []
-					},
-					timer: {
-						end: null,
-						remaining: timer,
-						max: timer
 					}
 				};
 
@@ -343,10 +341,6 @@
 							return obj[prop];
 						},
 						set: function(obj, prop, newValue, rcvr) {
-							if (typeof prop !== 'number' && prop !== 'remaining') {
-								console.log(`setting ${prop} with`, newValue, rcvr);
-							}
-
 							if (obj[prop] === newValue) {
 								return true;
 							}
@@ -359,12 +353,6 @@
 
 								return true;
 							}
-
-							// if (prop === 'wordsSucceed') {
-							// 	succeedCountElement.innerText = obj[prop].length;
-							// 	obj[prop] = newValue.length;
-							// 	return true;
-							// }
 
 							return Reflect.set(...arguments);
 						}
@@ -454,7 +442,7 @@
 				currentTurnWordsToSucceedElement.innerText = wordsToSucceedCount;
 				failedCountElement.innerText = currentTurn.wordsFailed.length;
 				timerVisualElement.style.setProperty('--timer-visual-width', `100%`);
-				timerRemainingElement.innerHTML = `${timer.max}&#8239;<span aria-label="seconds">s</span>`
+				timerRemainingElement.innerHTML = `${version.timer}&#8239;<span aria-label="seconds">s</span>`
 
 				if (hasImages && !wordImageElement) {
 					const imgElement = document.createElement('img');
@@ -574,19 +562,18 @@
 		// ----------------- TIMER ------------------
 
 		function startTimer() {
-			const {
-				timer
+			let {
+				timerRemaining
 			} = state;
 
-			timer.remaining = timer.max;
+			timerRemaining = version.timer;
 
 			const now = new Date().getTime();
-			timer.end = now + (timer.remaining * 1000);
-			timer.remaining--;
+			timerEnd = now + (timerRemaining * 1000);
 
-			timerRemainingElement.innerHTML = `${timer.remaining}&#8239;<span aria-label="seconds">s</span>`
+			timerRemainingElement.innerHTML = `${timerRemaining}&#8239;<span aria-label="seconds">s</span>`
 
-			timerHandle = setInterval(countdown, 1000);
+			timerHandle = setInterval(countdown, 750);
 		}
 
 		function stopTimer() {
@@ -595,24 +582,30 @@
 
 		function countdown() {
 			const now = new Date().getTime();
-			const {
-				timer
+			let {
+				timerRemaining
 			} = state;
 
-			timer.remaining = Math.trunc((timer.end - now)/1000);
+			const newTimerRemaining = Math.trunc((timerEnd - now)/1000);
 
-			if (timer.remaining < 10 && timer.remaining >= 0) {
+			if (timerRemaining === newTimerRemaining) {
+				return;
+			}
+
+			timerRemaining = newTimerRemaining;
+
+			if (timerRemaining < 10 && timerRemaining >= 0) {
 				tickSound.currentTime = 0;
 				tickSound.play();
 			}
 
 			app.dispatchEvent(new CustomEvent('updateTimer', {
 				detail: {
-					remaining: timer.remaining
+					remaining: timerRemaining
 				}
 			}));
 
-			if (timer.remaining <= 0) {
+			if (timerRemaining <= 0) {
 				clearInterval(timerHandle);
 				timeIsUpSound.currentTime = 0;
 				timeIsUpSound.play();
