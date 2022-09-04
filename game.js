@@ -109,7 +109,7 @@
 
 				if (roundDetails.shuffle) {
 					UTILS.shuffle(state.wordsToSucceed);
-					state.currentWord = state.wordsToSucceed[0];
+					state.wordUnderGuess = state.wordsToSucceed[0];
 				}
 				wordsToSucceedCount = wordsToSucceed.length;
 
@@ -190,7 +190,7 @@
 			const succeedWordsCount = currentTurn.wordsSucceed.length;
 
 			wordsToSucceed.shift();
-			currentTurn.wordsFailed.push(state.currentWord);
+			currentTurn.wordsFailed.push(state.wordUnderGuess);
 
 			const failedWordsCount = currentTurn.wordsFailed.length;
 			const totalPlayed = (succeedWordsCount + failedWordsCount);
@@ -199,7 +199,7 @@
 				app.dispatchEvent(new CustomEvent('wordFailed'));
 			} else if (totalPlayed < wordsToSucceedCount) {
 				const newWord = state.wordsToSucceed[0];
-				state.currentWord = newWord;
+				state.wordUnderGuess = newWord;
 
 				app.dispatchEvent(new CustomEvent('wordFailed', {
 					detail: {
@@ -226,7 +226,7 @@
 			const failedWordsCount = currentTurn.wordsFailed.length;
 
 			wordsToSucceed.shift();
-			currentTurn.wordsSucceed.push(state.currentWord);
+			currentTurn.wordsSucceed.push(state.wordUnderGuess);
 
 			const succeedWordsCount = currentTurn.wordsSucceed.length;
 			const totalPlayed = (succeedWordsCount + failedWordsCount);
@@ -235,7 +235,7 @@
 				app.dispatchEvent(new CustomEvent('wordSucceed'));
 			} else if (totalPlayed < wordsToSucceedCount) {
 				const newWord = state.wordsToSucceed[0];
-				state.currentWord = newWord;
+				state.wordUnderGuess = newWord;
 
 				app.dispatchEvent(new CustomEvent('wordSucceed', {
 					detail: {
@@ -291,7 +291,7 @@
 				// wordsToSucceedCount
 
 				state = {
-					currentWord: gameDeck[0],
+					wordUnderGuess: gameDeck[0],
 					wordsToSucceed: [...gameDeck],
 					currentRound: {
 						count: 1,
@@ -351,7 +351,7 @@
 								return true;
 							}
 
-							if (prop === 'currentWord') {
+							if (prop === 'wordUnderGuess') {
 								const dictionaryEntry = version.dictionary[newValue];
 
 								obj[prop] = newValue;
@@ -404,7 +404,7 @@
 				UTILS.shuffle(gameDeck);
 				state.wordsToSucceed = [...gameDeck];
 				wordsToSucceedCount = state.wordsToSucceed.length;
-				state.currentWord = state.wordsToSucceed[0];
+				state.wordUnderGuess = state.wordsToSucceed[0];
 			}
 		};
 
@@ -441,10 +441,10 @@
 					currentTurn,
 					teams,
 					currentRound,
-					currentWord,
+					wordUnderGuess,
 					timer
 				} = state;
-				const dictionaryEntry = version.dictionary[currentWord];
+				const dictionaryEntry = version.dictionary[wordUnderGuess];
 
 				currentTurnTeamElement.innerText = currentTurn.team;
 				teamsCountElement.innerText = teams.length;
@@ -461,12 +461,12 @@
 					imgElement.id = 'image';
 					imgElement.classList.add('c-word__image');
 					imgElement.src = `./images/${dictionaryEntry.img}`;
-					imgElement.alt = `${currentWord}${currentWord !== dictionaryEntry.desc ? `: ${dictionaryEntry.desc}` : currentWord}`;
+					imgElement.alt = `${wordUnderGuess}${wordUnderGuess !== dictionaryEntry.desc ? `: ${dictionaryEntry.desc}` : wordUnderGuess}`;
 					wordElement.appendChild(imgElement);
 					wordImageElement = wordElement.querySelector('img');
 				} else if (hasImages && wordImageElement) {
 					wordImageElement.src = `./images/${dictionaryEntry.img}`;
-					wordImageElement.alt = `${currentWord}${currentWord !== dictionaryEntry.desc ? `: ${dictionaryEntry.desc}` : currentWord}`;
+					wordImageElement.alt = `${wordUnderGuess}${wordUnderGuess !== dictionaryEntry.desc ? `: ${dictionaryEntry.desc}` : wordUnderGuess}`;
 				}
 
 				if (currentRound.wordSkipAllowed) {
