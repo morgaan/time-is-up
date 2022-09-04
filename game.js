@@ -58,6 +58,8 @@
 			}
 		};
 
+		let wordsToSucceedCount = wordsCount;
+
 		// ------------------ INIT  ---------------
 
 		function init(app) {
@@ -109,7 +111,7 @@
 					UTILS.shuffle(state.wordsToSucceed);
 					state.currentWord = state.wordsToSucceed[0];
 				}
-				currentTurn.wordsToSucceedCount = wordsToSucceed.length;
+				wordsToSucceedCount = wordsToSucceed.length;
 
 				alert(`Au tour de l'équipe ${currentTurn.team}`);
 
@@ -193,9 +195,9 @@
 			const failedWordsCount = currentTurn.wordsFailed.length;
 			const totalPlayed = (succeedWordsCount + failedWordsCount);
 
-			if (totalPlayed === currentTurn.wordsToSucceedCount) {
+			if (totalPlayed === wordsToSucceedCount) {
 				app.dispatchEvent(new CustomEvent('wordFailed'));
-			} else if (totalPlayed < currentTurn.wordsToSucceedCount) {
+			} else if (totalPlayed < wordsToSucceedCount) {
 				const newWord = state.wordsToSucceed[0];
 				state.currentWord = newWord;
 
@@ -210,7 +212,7 @@
 			failedSound.currentTime = 0;
 			failedSound.play();
 
-			if (totalPlayed === currentTurn.wordsToSucceedCount) {
+			if (totalPlayed === wordsToSucceedCount) {
 				endOfTurn();
 				return;
 			}
@@ -229,9 +231,9 @@
 			const succeedWordsCount = currentTurn.wordsSucceed.length;
 			const totalPlayed = (succeedWordsCount + failedWordsCount);
 
-			if (totalPlayed === currentTurn.wordsToSucceedCount) {
+			if (totalPlayed === wordsToSucceedCount) {
 				app.dispatchEvent(new CustomEvent('wordSucceed'));
-			} else if (totalPlayed < currentTurn.wordsToSucceedCount) {
+			} else if (totalPlayed < wordsToSucceedCount) {
 				const newWord = state.wordsToSucceed[0];
 				state.currentWord = newWord;
 
@@ -246,7 +248,7 @@
 			succeedSound.currentTime = 0;
 			succeedSound.play();
 
-			if (totalPlayed === currentTurn.wordsToSucceedCount) {
+			if (totalPlayed === wordsToSucceedCount) {
 				endOfTurn();
 				return;
 			}
@@ -265,6 +267,29 @@
 			init: function() {
 				const {rounds, timer} = version;
 
+				// Proposal state:
+				//
+				// Only relevant for current turn
+				// {
+				//	wordUnderGuess: gameDeck[0],
+				//	nbOfSucceed: 0,
+				//	nbOfFailed: 0,
+				//	timerEnd: null,
+				//	timerRemaining: timer,
+				// }
+				//
+				// Out of state:
+				//
+				//	roundDeck: [...gameDeck], // wordsToSucceed
+				//	round: 1,
+				//	rule: roundsRules[rounds[0]].rule,
+				//	skipAllowed: roundsRules[rounds[0]].wordSkipAllowed,
+				//	teamPlaying: 1,
+				//
+				// Do not neeed really
+				//
+				// wordsToSucceedCount
+
 				state = {
 					currentWord: gameDeck[0],
 					wordsToSucceed: [...gameDeck],
@@ -275,8 +300,7 @@
 					currentTurn: {
 						team: 1,
 						wordsSucceed : [],
-						wordsFailed : [],
-						wordsToSucceedCount: gameDeck.length
+						wordsFailed : []
 					},
 					timer: {
 						end: null,
@@ -318,8 +342,10 @@
 
 							return obj[prop];
 						},
-						set: function(obj, prop, newValue) {
-							console.log(`setting ${prop} with`, newValue);
+						set: function(obj, prop, newValue, rcvr) {
+							if (typeof prop !== 'number' && prop !== 'remaining') {
+								console.log(`setting ${prop} with`, newValue, rcvr);
+							}
 
 							if (obj[prop] === newValue) {
 								return true;
@@ -334,8 +360,11 @@
 								return true;
 							}
 
-							if (prop === 'currentWord') {
-							}
+							// if (prop === 'wordsSucceed') {
+							// 	succeedCountElement.innerText = obj[prop].length;
+							// 	obj[prop] = newValue.length;
+							// 	return true;
+							// }
 
 							return Reflect.set(...arguments);
 						}
@@ -374,7 +403,7 @@
 
 				UTILS.shuffle(gameDeck);
 				state.wordsToSucceed = [...gameDeck];
-				currentTurn.wordsToSucceedCount = state.wordsToSucceed.length;
+				wordsToSucceedCount = state.wordsToSucceed.length;
 				state.currentWord = state.wordsToSucceed[0];
 			}
 		};
@@ -422,7 +451,7 @@
 				currentRoundElement.innerText = currentRound.count;
 				roundsCountElement.innerText = roundsCount;
 				succeedCountElement.innerText = currentTurn.wordsSucceed.length;
-				currentTurnWordsToSucceedElement.innerText = currentTurn.wordsToSucceedCount;
+				currentTurnWordsToSucceedElement.innerText = wordsToSucceedCount;
 				failedCountElement.innerText = currentTurn.wordsFailed.length;
 				timerVisualElement.style.setProperty('--timer-visual-width', `100%`);
 				timerRemainingElement.innerHTML = `${timer.max}&#8239;<span aria-label="seconds">s</span>`
