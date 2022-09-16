@@ -10,13 +10,13 @@
 		let state;
 
 		let liveRegionElement;
-		let currentTurnTeamElement;
+		let teamPlayingElement;
 		let teamsCountElement;
 		let currentRoundElement;
-		let roundsCountElement;
-		let currentTurnWordsToSucceedElement;
-		let succeedCountElement;
-		let failedCountElement;
+		let nbOfRoundsElement;
+		let nbOfWordsLeftToSucceedElement;
+		let nbOfSucceedElement;
+		let nbOfFailedElement;
 		let wordElement;
 		let wordImageElement;
 		let succeedButtonElement;
@@ -129,8 +129,8 @@
 				currentRound
 			} = state;
 
-			let message = `Rappel de la règle:<br>${currentRound.rule}<br><br>`;
-			message += `C'est au tour de l'équipe ${state.currentTurn.team}`;
+			let message = `<h3>Rappel de la règle</h3><p>${currentRound.rule}</p>`;
+			message += `<p>C'est au tour de l'équipe ${state.currentTurn.team}</p>`;
 
 			infoDialog(`Début de la manche ${currentRound.count}`, message, 'Commençer !', function startTimerCallback() {
 				AUDIO.setupSound(tickSound);
@@ -270,27 +270,28 @@
 
 				// Proposal state:
 				//
-				// Only relevant for current turn
-				// {
+				// turnState = {
 				//	wordUnderGuess: gameDeck[0],
 				//	nbOfSucceed: 0,
 				//	nbOfFailed: 0,
-				//	timerEnd: null,
 				//	timerRemaining: timer,
 				// }
 				//
-				// Out of state:
-				//
+				// roundState = {
 				//	roundDeck: [...gameDeck], // wordsToSucceed
-				//	round: 1,
+				//	teamPlaying: 1,
+				//	succeed: [],
+				//	failed: []
+				// }
+				//
+				// gameState = {
+				//	round: 1
 				//	rule: roundsRules[rounds[0]].rule,
 				//	skipAllowed: roundsRules[rounds[0]].wordSkipAllowed,
-				//	teamPlaying: 1,
+				//	timerEnd: null,
+				//  scores: [0,0,...]
+				// }
 				//
-				// Do not neeed really
-				//
-				// wordsToSucceedCount
-				// timerEnd
 
 				state = {
 					wordUnderGuess: gameDeck[0],
@@ -401,13 +402,13 @@
 		const UI = {
 			queryAllElements: function() {
 				liveRegionElement = document.querySelector('#live-region');
-				currentTurnTeamElement = app.querySelector('#currentTurnTeam');
-				teamsCountElement = app.querySelector('#teamsCount');
+				teamPlayingElement = app.querySelector('#teamPlaying');
+				teamsCountElement = app.querySelector('#nbOfTeams');
 				currentRoundElement = app.querySelector('#currentRound');
-				roundsCountElement = app.querySelector('#roundsCount');
-				currentTurnWordsToSucceedElement = app.querySelector('#currentTurnWordsToSucceedCount');
-				succeedCountElement = app.querySelector('#succeedCount');
-				failedCountElement = app.querySelector('#failedCount');
+				nbOfRoundsElement = app.querySelector('#nbOfRounds');
+				nbOfWordsLeftToSucceedElement = app.querySelector('#nbOfWordsLeftToSucceed');
+				nbOfSucceedElement = app.querySelector('#nbOfSucceed');
+				nbOfFailedElement = app.querySelector('#nbOfFailed');
 				wordElement = app.querySelector('#word');
 				succeedButtonElement = app.querySelector('#succeed');
 				failedButtonElement = app.querySelector('#failed');
@@ -434,13 +435,13 @@
 				} = state;
 				const dictionaryEntry = version.dictionary[wordUnderGuess];
 
-				currentTurnTeamElement.innerText = currentTurn.team;
+				teamPlayingElement.innerText = currentTurn.team;
 				teamsCountElement.innerText = teams.length;
 				currentRoundElement.innerText = currentRound.count;
-				roundsCountElement.innerText = roundsCount;
-				succeedCountElement.innerText = currentTurn.wordsSucceed.length;
-				currentTurnWordsToSucceedElement.innerText = wordsToSucceedCount;
-				failedCountElement.innerText = currentTurn.wordsFailed.length;
+				nbOfRoundsElement.innerText = roundsCount;
+				nbOfSucceedElement.innerText = currentTurn.wordsSucceed.length;
+				nbOfWordsLeftToSucceedElement.innerText = wordsToSucceedCount;
+				nbOfFailedElement.innerText = currentTurn.wordsFailed.length;
 				timerVisualElement.style.setProperty('--timer-visual-width', `100%`);
 				timerRemainingElement.innerHTML = `${version.timer}&#8239;<span aria-label="seconds">s</span>`
 
@@ -518,13 +519,13 @@
 				}
 
 				function wordSucceedHandler(event) {
-					const currentSucceedCount = new Number(succeedCountElement.textContent);
-					succeedCountElement.textContent = currentSucceedCount + 1;
+					const currentSucceedCount = new Number(nbOfSucceedElement.textContent);
+					nbOfSucceedElement.textContent = currentSucceedCount + 1;
 				}
 
 				function wordFailedHandler(event) {
-					const currentFailedCount = new Number(failedCountElement.textContent);
-					failedCountElement.textContent = currentFailedCount + 1;
+					const currentFailedCount = new Number(nbOfFailedElement.textContent);
+					nbOfFailedElement.textContent = currentFailedCount + 1;
 				}
 			}
 		};	
