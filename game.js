@@ -155,8 +155,8 @@
 
 			infoDialog(`Fin de la manche ${currentRound.count}`, dialogMessage, 'OK !', function proceedToNextRoundOrEndOfGame() {
 				if (currentRound.count === numberOfRounds) {
-					setTimeout(0, endOfGame);
-					// endOfGame();
+					// setTimeout(0, endOfGame);
+					endOfGame();
 				} else {
 					STATE.nextRound();
 
