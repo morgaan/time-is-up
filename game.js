@@ -419,7 +419,7 @@
 					teams,
 					currentRound,
 					wordUnderGuess,
-					timer
+					wordsToSucceed
 				} = state;
 				const dictionaryEntry = settings.gameVersion.dictionary[wordUnderGuess];
 
@@ -432,6 +432,19 @@
 				numberOfFailedElement.innerText = currentTurn.wordsFailed.length;
 				timerVisualElement.style.setProperty('--timer-visual-width', `100%`);
 				timerRemainingElement.innerHTML = `${settings.gameVersion.timer}&#8239;<span aria-label="seconds">s</span>`
+
+				if (hasImages) {
+					wordsToSucceed.forEach(function appendLinkToPrefetchImage(word) {
+						const {img} = settings.gameVersion.dictionary[word];
+						const href = `./images/${img}`;
+						const linkElement = document.createElement('link');
+						linkElement.rel = 'preload';
+						linkElement.href = href;
+						linkElement.as = 'image';
+						linkElement.type = "image/svg+xml";
+						document.head.appendChild(linkElement);
+					});
+				}
 
 				if (hasImages && !wordImageElement) {
 					const imgElement = document.createElement('img');
