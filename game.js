@@ -33,7 +33,6 @@
 		let dialog;
 		let dialogMask;
 		let dialogWindow;
-		let dialogOnCloseCallback;
 
 		let timerHandle;
 		let timerEnd = null;
@@ -117,11 +116,10 @@
 				}
 				wordsToSucceedCount = wordsToSucceed.length;
 
-				alert(`Au tour de l'équipe ${currentTurn.team}`);
-
-				UI.setupBoard();
-
-				startTimer();
+				infoDialog('Changement d\'équipe', `Au tour de l'équipe ${currentTurn.team}`, 'OK !', function setupBoardAndRestartTimer() {
+					UI.setupBoard();
+					startTimer();
+				});
 			} else {
 				endOfRound();
 			}
@@ -148,39 +146,51 @@
 				teams,
 			} = state;
 
-			let message = `Fin de la manche ${currentRound.count}\n\n`;
-
+			let dialogMessage = '<ul>';
 			teams.forEach(function appendEndOfRoundMessage(team, index) {
 				const score = team.pointsPerRound[currentRound.count-1];
-				message += `L'équipe ${index+1} a marqué ${score} point${score > 1 ? 's' : ''}\n`;
+				dialogMessage += `<li>L'équipe ${index+1} a marqué ${score} point${score > 1 ? 's' : ''}</li>`;
 			});
+			dialogMessage += '</ul>';
 
-			alert(message);
+			infoDialog(`Fin de la manche ${currentRound.count}`, dialogMessage, 'OK !', function proceedToNextRoundOrEndOfGame() {
+				if (currentRound.count === numberOfRounds) {
+					setTimeout(0, endOfGame);
+					// endOfGame();
+				} else {
+					STATE.nextRound();
 
-			if (currentRound.count === numberOfRounds) {
-				endOfGame();
-			} else {
-				STATE.nextRound();
-
-				if (currentRound.count <= numberOfRounds) {
-					UI.setupBoard();
-					startOfRound();
+					if (currentRound.count <= numberOfRounds) {
+						UI.setupBoard();
+						startOfRound();
+					}
 				}
-			}
+			});
 		}
 
 		function endOfGame() {
 			const totalScores = UTILS.computeRanks(numberOfRounds, state.teams);
+			let dialogMessage = '';
 
-			message = 'Fin de la partie, voici le classement\n\n';
-
-			Object.keys(totalScores).forEach(function appendEndOfGameMessage(team, index) {
-				message += `#${index+1} ${team} avec ${totalScores[team]} point${totalScores[team] > 1 ? 's' : ''}\n`
+			let isTie = Object.values(totalScores).every(function areAllTotalScoresEquals(totalScore) {
+				return totalScore === Object.values(totalScores)[0];
 			});
 
-			alert(message);
+			if (isTie) {
+				const totalScore = Object.values(totalScores)[0];
+				dialogMessage = `Toutes les équipes sont à egalité avec ${totalScore} point${totalScore > 1 ? 's' : ''} !`;
+			} else {
+				dialogMessage = '<ol>';
+				Object.keys(totalScores).forEach(function appendEndOfGameMessage(team, index) {
+					const totalScore = totalScores[team];
+					dialogMessage += `<li>${team} avec ${totalScore} point${totalScore > 1 ? 's' : ''}</li>`;
+				});
+				dialogMessage += '</ol>';
+			}
 
-			location.href = '/index.html';
+			infoDialog('Fin de la partie, voici le classement', dialogMessage, 'Recommençer une partie !', function returnToIndex() {
+				location.href = `${location.href.match(/^(.*\/)game\./)[1]}index.html`;
+			});
 		}
 
 
@@ -270,31 +280,6 @@
 		const STATE = {
 			init: function() {
 				const {roundsName, timer} = settings.gameVersion;
-
-				// Proposal state:
-				//
-				// turnState = {
-				//	wordUnderGuess: gameDeck[0],
-				//	numberOfSucceed: 0,
-				//	numberOfFailed: 0,
-				//	timerRemaining: timer,
-				// }
-				//
-				// roundState = {
-				//	roundDeck: [...gameDeck], // wordsToSucceed
-				//	teamPlaying: 1,
-				//	succeed: [],
-				//	failed: []
-				// }
-				//
-				// gameState = {
-				//	round: 1
-				//	rule: roundsRules[rounds[0]].rule,
-				//	skipAllowed: roundsRules[rounds[0]].wordSkipAllowed,
-				//	timerEnd: null,
-				//  scores: [0,0,...]
-				// }
-				//
 
 				state = {
 					wordUnderGuess: gameDeck[0],
@@ -433,8 +418,7 @@
 					currentTurn,
 					teams,
 					currentRound,
-					wordUnderGuess,
-					timer
+					wordUnderGuess
 				} = state;
 				const dictionaryEntry = settings.gameVersion.dictionary[wordUnderGuess];
 
@@ -484,7 +468,6 @@
 				app.addEventListener('updateTimer', updateTimerHandler);
 				app.addEventListener('wordSucceed', wordSucceedHandler);
 				app.addEventListener('wordFailed', wordFailedHandler);
-
 
 				// ---
 
@@ -625,13 +608,16 @@
 			dialogWindow.querySelector('#dialog-button').textContent = buttonLabel;
 
 			const button = dialogWindow.querySelector('#dialog-button');
-			dialogOnCloseCallback = callback;
-			button.addEventListener('click', closeDialog);
+			button.addEventListener('click', function closeDialogHandler () {
+				closeDialog(callback)
+			});
 
 			openDialog();
 		}
 
 		function openDialog() {
+			const button = dialogWindow.querySelector('#dialog-button');
+
 			previousActiveElement = document.activeElement;
 
 			Array.from(document.body.children).forEach(child => {
@@ -641,23 +627,13 @@
 			});
 
 			dialog.classList.add('opened');
-
 			dialogMask.addEventListener('click', closeDialog);
-			const button = dialogWindow.querySelector('#dialog-button');
 			button.addEventListener('click', closeDialog);
 			document.addEventListener('keydown', checkCloseDialog);
-
 			dialog.querySelector('button').focus();
 		}
 
-		function checkCloseDialog() {
-			// Check for Escape key.
-			if (e.keyCode === 27) {
-				closeDialog();
-			}
-		}
-
-		function closeDialog() {
+		function closeDialog(dialogOnCloseCallback) {
 			dialogMask.removeEventListener('click', closeDialog);
 			dialogWindow.querySelector('button').removeEventListener('click', closeDialog);
 			document.removeEventListener('keydown', checkCloseDialog);
@@ -675,10 +651,14 @@
 			if (dialogOnCloseCallback) {
 				dialogOnCloseCallback();
 			}
-
-			dialogOnCloseCallback = null;
 		}
 
+		function checkCloseDialog() {
+			// Check for Escape key.
+			if (e.keyCode === 27) {
+				closeDialog();
+			}
+		}
 
 		// ----------------- UTILS ------------------
 
