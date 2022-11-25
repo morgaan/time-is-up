@@ -37,6 +37,7 @@ h3 {
 
 p {
 	margin-bottom: .5rem;
+	line-height: 1.5rem;
 }
 
 fieldset {
@@ -273,10 +274,9 @@ figcaption {
 	grid-gap: 24px;
 	z-index: 101;
 	position: fixed;
-	top: 3vh;
-	bottom: 3vh;
-	left: 3vw;
-	right: 3vw;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%,-50%);
 	border-radius: 6px;
 	padding: 1rem;
 	background: #27284c;

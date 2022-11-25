@@ -1,36 +1,45 @@
-// TODO Fix issue, end of round does not update to next round
-// TODO Fix issue, visual timer is broken
 // TODO Swap alerts with dialogs
 (function(window, document, undefined) {
 	const TimesUp = (function() {
+		const version = JSON.parse(window.localStorage.getItem('version'));
+		const teamsCount = Number.parseInt(window.localStorage.getItem('teamsCount'));
+		const wordsCount = Number.parseInt(window.localStorage.getItem('wordsCount'));
+		let roundsCount;
+		let gameDeck;
+		let hasImages;
+		let state;
+
 		let liveRegionElement;
-		let currentTurnTeamElement;
+		let teamPlayingElement;
 		let teamsCountElement;
 		let currentRoundElement;
-		let roundsCountElement;
-		let currentTurnWordsToSucceedElement;
-		let succeedCountElement;
-		let failedCountElement;
+		let nbOfRoundsElement;
+		let nbOfWordsLeftToSucceedElement;
+		let nbOfSucceedElement;
+		let nbOfFailedElement;
 		let wordElement;
 		let wordImageElement;
+		let succeedButtonElement;
+		let stopButtonElement;
 		let failedButtonElement;
 		let timerElement;
 		let timerVisualElement;
 		let timerRemainingElement;
-		let state;
-		let timerHandle;
-		let timeIsUpSound;
-		let failedSound;
-		let succeedSound;
-		let stopSound;
-		let tickSound;
+
 		let previousActiveElement;
 		let dialog;
 		let dialogMask;
 		let dialogWindow;
 		let dialogOnCloseCallback;
 
-		const version = JSON.parse(window.localStorage.getItem('version'));
+		let timerHandle;
+		let timerEnd = null;
+
+		let timeIsUpSound;
+		let failedSound;
+		let succeedSound;
+		let stopSound;
+		let tickSound;
 
 		const roundRules = {
 			freeSpeech: {
@@ -50,12 +59,20 @@
 			}
 		};
 
+		let wordsToSucceedCount = wordsCount;
+
 		// ------------------ INIT  ---------------
 
 		function init(app) {
 			UI.queryAllElements();
+
+			roundsCount = version.rounds.length;
+			hasImages = version.hasImages;
+			gameDeck = GAME.createDeck(wordsCount);
+
 			STATE.init();
 			UI.setupBoard();
+			STATE.proxify();
 
 			// Swaps Loading... with the actual app.
 			app.removeAttribute('style');
@@ -63,7 +80,7 @@
 
 			startOfRound();
 
-			UI.setupCustomEvents(app);
+			UI.setupEvents(app);
 		}
 
 		// ------------------ GAME STEPS  ---------------
@@ -93,9 +110,9 @@
 
 				if (roundDetails.shuffle) {
 					UTILS.shuffle(state.wordsToSucceed);
-					state.currentWord = state.wordsToSucceed[0];
+					state.wordUnderGuess = state.wordsToSucceed[0];
 				}
-				currentTurn.wordsToSucceedCount = wordsToSucceed.length;
+				wordsToSucceedCount = wordsToSucceed.length;
 
 				alert(`Au tour de l'équipe ${currentTurn.team}`);
 
@@ -112,8 +129,8 @@
 				currentRound
 			} = state;
 
-			let message = `Rappel de la règle:<br>${currentRound.rule}<br><br>`;
-			message += `C'est au tour de l'équipe ${state.currentTurn.team}`;
+			let message = `<h3>Rappel de la règle</h3><p>${currentRound.rule}</p>`;
+			message += `<p>C'est au tour de l'équipe ${state.currentTurn.team}</p>`;
 
 			infoDialog(`Début de la manche ${currentRound.count}`, message, 'Commençer !', function startTimerCallback() {
 				AUDIO.setupSound(tickSound);
@@ -126,7 +143,6 @@
 			const {
 				currentRound,
 				teams,
-				roundsCount
 			} = state;
 
 			let message = `Fin de la manche ${currentRound.count}\n\n`;
@@ -143,14 +159,15 @@
 			} else {
 				STATE.nextRound();
 
-				if (currentRound.count !== roundsCount) {
+				if (currentRound.count <= roundsCount) {
+					UI.setupBoard();
 					startOfRound();
 				}
 			}
 		}
 
 		function endOfGame() {
-			const totalScores = UTILS.computeRanks(state);
+			const totalScores = UTILS.computeRanks(roundsCount, state.teams);
 
 			message = 'Fin de la partie, voici le classement\n\n';
 
@@ -174,16 +191,16 @@
 			const succeedWordsCount = currentTurn.wordsSucceed.length;
 
 			wordsToSucceed.shift();
-			currentTurn.wordsFailed.push(state.currentWord);
+			currentTurn.wordsFailed.push(state.wordUnderGuess);
 
 			const failedWordsCount = currentTurn.wordsFailed.length;
 			const totalPlayed = (succeedWordsCount + failedWordsCount);
 
-			if (totalPlayed === currentTurn.wordsToSucceedCount) {
+			if (totalPlayed === wordsToSucceedCount) {
 				app.dispatchEvent(new CustomEvent('wordFailed'));
-			} else if (totalPlayed < currentTurn.wordsToSucceedCount) {
+			} else if (totalPlayed < wordsToSucceedCount) {
 				const newWord = state.wordsToSucceed[0];
-				state.currentWord = newWord;
+				state.wordUnderGuess = newWord;
 
 				app.dispatchEvent(new CustomEvent('wordFailed', {
 					detail: {
@@ -196,7 +213,7 @@
 			failedSound.currentTime = 0;
 			failedSound.play();
 
-			if (totalPlayed === currentTurn.wordsToSucceedCount) {
+			if (totalPlayed === wordsToSucceedCount) {
 				endOfTurn();
 				return;
 			}
@@ -210,16 +227,16 @@
 			const failedWordsCount = currentTurn.wordsFailed.length;
 
 			wordsToSucceed.shift();
-			currentTurn.wordsSucceed.push(state.currentWord);
+			currentTurn.wordsSucceed.push(state.wordUnderGuess);
 
 			const succeedWordsCount = currentTurn.wordsSucceed.length;
 			const totalPlayed = (succeedWordsCount + failedWordsCount);
 
-			if (totalPlayed === currentTurn.wordsToSucceedCount) {
+			if (totalPlayed === wordsToSucceedCount) {
 				app.dispatchEvent(new CustomEvent('wordSucceed'));
-			} else if (totalPlayed < currentTurn.wordsToSucceedCount) {
+			} else if (totalPlayed < wordsToSucceedCount) {
 				const newWord = state.wordsToSucceed[0];
-				state.currentWord = newWord;
+				state.wordUnderGuess = newWord;
 
 				app.dispatchEvent(new CustomEvent('wordSucceed', {
 					detail: {
@@ -232,7 +249,7 @@
 			succeedSound.currentTime = 0;
 			succeedSound.play();
 
-			if (totalPlayed === currentTurn.wordsToSucceedCount) {
+			if (totalPlayed === wordsToSucceedCount) {
 				endOfTurn();
 				return;
 			}
@@ -250,18 +267,36 @@
 		const STATE = {
 			init: function() {
 				const {rounds, timer} = version;
-				const teamsCount = Number.parseInt(window.localStorage.getItem('teamsCount'));
-				const wordsCount = Number.parseInt(window.localStorage.getItem('wordsCount'));
-				const roundsCount = rounds.length;
-				const gameDeck = GAME.createDeck(wordsCount);
+
+				// Proposal state:
+				//
+				// turnState = {
+				//	wordUnderGuess: gameDeck[0],
+				//	nbOfSucceed: 0,
+				//	nbOfFailed: 0,
+				//	timerRemaining: timer,
+				// }
+				//
+				// roundState = {
+				//	roundDeck: [...gameDeck], // wordsToSucceed
+				//	teamPlaying: 1,
+				//	succeed: [],
+				//	failed: []
+				// }
+				//
+				// gameState = {
+				//	round: 1
+				//	rule: roundsRules[rounds[0]].rule,
+				//	skipAllowed: roundsRules[rounds[0]].wordSkipAllowed,
+				//	timerEnd: null,
+				//  scores: [0,0,...]
+				// }
+				//
 
 				state = {
-					roundsCount,
-					teamsCount,
-					currentWord: gameDeck[0],
-					gameDeck,
+					wordUnderGuess: gameDeck[0],
+					timerRemaining: timer,
 					wordsToSucceed: [...gameDeck],
-					hasImages: version.hasImages,
 					currentRound: {
 						count: 1,
 						...roundRules[rounds[0]]
@@ -269,13 +304,7 @@
 					currentTurn: {
 						team: 1,
 						wordsSucceed : [],
-						wordsFailed : [],
-						wordsToSucceedCount: gameDeck.length
-					},
-					timer: {
-						end: null,
-						remaining: timer,
-						max: timer
+						wordsFailed : []
 					}
 				};
 
@@ -295,6 +324,41 @@
 				}
 
 				state.teams = teams;
+			},
+			proxify: function () {
+				state = new Proxy(state, proxyHandler(state));
+
+				function proxyHandler(data) {
+					return {
+						get: function(obj, prop) {
+							if (prop === '_isProxy') {
+								return true;
+							}
+
+							if (['object', 'array'].includes(Object.prototype.toString.call(obj[prop]).slice(8, -1).toLowerCase()) && !obj[prop]._isProxy) {
+								obj[prop] = new Proxy(obj[prop], proxyHandler(data));
+							}
+
+							return obj[prop];
+						},
+						set: function(obj, prop, newValue, rcvr) {
+							if (obj[prop] === newValue) {
+								return true;
+							}
+
+							if (prop === 'wordUnderGuess') {
+								const dictionaryEntry = version.dictionary[newValue];
+
+								obj[prop] = newValue;
+								UI.updateWord(newValue, dictionaryEntry);
+
+								return true;
+							}
+
+							return Reflect.set(...arguments);
+						}
+					};
+				};
 			},
 			nextTeam: function () {
 				const {
@@ -326,10 +390,10 @@
 				currentRound.rule = newRoundDetails.rule;
 				currentRound.wordSkipAllowed = newRoundDetails.wordSkipAllowed;
 
-				UTILS.shuffle(state.gameDeck);
-				state.wordsToSucceed = [...state.gameDeck];
-				currentTurn.wordsToSucceedCount = state.wordsToSucceed.length;
-				state.currentWord = state.wordsToSucceed[0];
+				UTILS.shuffle(gameDeck);
+				state.wordsToSucceed = [...gameDeck];
+				wordsToSucceedCount = state.wordsToSucceed.length;
+				state.wordUnderGuess = state.wordsToSucceed[0];
 			}
 		};
 
@@ -338,14 +402,15 @@
 		const UI = {
 			queryAllElements: function() {
 				liveRegionElement = document.querySelector('#live-region');
-				currentTurnTeamElement = app.querySelector('#currentTurnTeam');
-				teamsCountElement = app.querySelector('#teamsCount');
+				teamPlayingElement = app.querySelector('#teamPlaying');
+				teamsCountElement = app.querySelector('#nbOfTeams');
 				currentRoundElement = app.querySelector('#currentRound');
-				roundsCountElement = app.querySelector('#roundsCount');
-				currentTurnWordsToSucceedElement = app.querySelector('#currentTurnWordsToSucceedCount');
-				succeedCountElement = app.querySelector('#succeedCount');
-				failedCountElement = app.querySelector('#failedCount');
+				nbOfRoundsElement = app.querySelector('#nbOfRounds');
+				nbOfWordsLeftToSucceedElement = app.querySelector('#nbOfWordsLeftToSucceed');
+				nbOfSucceedElement = app.querySelector('#nbOfSucceed');
+				nbOfFailedElement = app.querySelector('#nbOfFailed');
 				wordElement = app.querySelector('#word');
+				succeedButtonElement = app.querySelector('#succeed');
 				failedButtonElement = app.querySelector('#failed');
 				stopButtonElement = app.querySelector('#stop');
 				timerElement = app.querySelector('#timer');
@@ -362,80 +427,106 @@
 			},
 			setupBoard: function() {
 				const {
-					hasImages,
 					currentTurn,
 					teams,
 					currentRound,
-					roundsCount,
-					currentWord,
+					wordUnderGuess,
 					timer
 				} = state;
-				const dictionaryEntry = version.dictionary[currentWord];
+				const dictionaryEntry = version.dictionary[wordUnderGuess];
 
-				currentTurnTeamElement.innerText = currentTurn.team;
+				teamPlayingElement.innerText = currentTurn.team;
 				teamsCountElement.innerText = teams.length;
 				currentRoundElement.innerText = currentRound.count;
-				roundsCountElement.innerText = roundsCount;
-				succeedCountElement.innerText = currentTurn.wordsSucceed.length;
-				currentTurnWordsToSucceedElement.innerText = currentTurn.wordsToSucceedCount;
-				failedCountElement.innerText = currentTurn.wordsFailed.length;
+				nbOfRoundsElement.innerText = roundsCount;
+				nbOfSucceedElement.innerText = currentTurn.wordsSucceed.length;
+				nbOfWordsLeftToSucceedElement.innerText = wordsToSucceedCount;
+				nbOfFailedElement.innerText = currentTurn.wordsFailed.length;
 				timerVisualElement.style.setProperty('--timer-visual-width', `100%`);
-				timerRemainingElement.innerHTML = `${timer.max}&#8239;<span aria-label="seconds">s</span>`
+				timerRemainingElement.innerHTML = `${version.timer}&#8239;<span aria-label="seconds">s</span>`
 
 				if (hasImages && !wordImageElement) {
 					const imgElement = document.createElement('img');
 					imgElement.id = 'image';
 					imgElement.classList.add('c-word__image');
 					imgElement.src = `./images/${dictionaryEntry.img}`;
-					imgElement.alt = `${currentWord}${currentWord !== dictionaryEntry.desc ? `: ${dictionaryEntry.desc}` : currentWord}`;
+					imgElement.alt = `${wordUnderGuess}${wordUnderGuess !== dictionaryEntry.desc ? `: ${dictionaryEntry.desc}` : wordUnderGuess}`;
 					wordElement.appendChild(imgElement);
 					wordImageElement = wordElement.querySelector('img');
-				} else if (hasImage && wordImageElement) {
+				} else if (hasImages && wordImageElement) {
 					wordImageElement.src = `./images/${dictionaryEntry.img}`;
-					wordImageElement.alt = `${currentWord}${currentWord !== dictionaryEntry.desc ? `: ${dictionaryEntry.desc}` : currentWord}`;
+					wordImageElement.alt = `${wordUnderGuess}${wordUnderGuess !== dictionaryEntry.desc ? `: ${dictionaryEntry.desc}` : wordUnderGuess}`;
 				}
 
-				if (!currentRound.wordSkipAllowed) {
+				if (currentRound.wordSkipAllowed) {
+					failedButtonElement.removeAttribute('disabled');
+				} else {
 					failedButtonElement.setAttribute('disabled', true);
 				}
 			},
-			setupCustomEvents: function(app) {
-				function updateWord({newWord, dictionaryEntry}) {
-					if (wordImageElement) {
-						wordImageElement.src = `./images/${dictionaryEntry.img}`;
-						wordImageElement.alt = `${newWord}${newWord !== dictionaryEntry.desc ? `: ${dictionaryEntry.desc}` : newWord}`;
+			updateWord: function(newWord, dictionaryEntry) {
+				if (wordImageElement) {
+					wordImageElement.src = `./images/${dictionaryEntry.img}`;
+					wordImageElement.alt = `${newWord}${newWord !== dictionaryEntry.desc ? `: ${dictionaryEntry.desc}` : newWord}`;
 
-						liveRegionElement.innerText = `Le nouveau mot est ${newWord}${newWord !== dictionaryEntry.desc ? `, l'image associée contient ${dictionaryEntry.desc}` : ''}`;
+					liveRegionElement.innerText = `Le nouveau mot est ${newWord}${newWord !== dictionaryEntry.desc ? `, l'image associée contient ${dictionaryEntry.desc}` : ''}`;
+				}
+				else {
+					wordElement.innerText = newWord;
+					liveRegionElement.innerText = `Le nouveau mot est ${newWord}`;
+				}
+			},
+			setupEvents: function(app) {
+				app.addEventListener('click', clickHandler);
+				app.addEventListener('updateTimer', updateTimerHandler);
+				app.addEventListener('wordSucceed', wordSucceedHandler);
+				app.addEventListener('wordFailed', wordFailedHandler);
+
+
+				// ---
+
+				function matchesButton(element, button) {
+					if (event.target.matches(`#${button.id}`)) {
+						return true;
+					} else if (event.target.closest('button').matches(`#${button.id}`)) {
+						// Handles the click on any children of the button (e.g. svg icon).
+						return true;
 					}
-					else {
-						wordElement.innerText = newWord;
-						liveRegionElement.innerText = `Le nouveau mot est ${newWord}`;
-					}
+					return false;
 				}
 
-				// New event on app
-				app.addEventListener('updateTimer', function updateTimerElement(event) {
+				// --- Event handlers
+
+				function clickHandler (event) {
+					if (matchesButton(event, succeedButtonElement)) {
+						event.preventDefault();
+						onWordSucceed();
+					} else if (matchesButton(event, failedButtonElement)) {
+						event.preventDefault();
+						onWordFailed();
+					} else if (matchesButton(event, stopButtonElement)) {
+						event.preventDefault();
+						onStopTurn();
+					}
+					return;
+				}
+
+				function updateTimerHandler(event) {
 					const remaining = event.detail.remaining;
 					const percentage = Math.trunc((remaining * 100) / version.timer);
 					timerVisualElement.style.setProperty('--timer-visual-width', `${percentage}%`);
 					timerRemainingElement.innerHTML = `${remaining}&#8239;<span aria-label="second${remaining === 1 ? '' : 's'}">s</span>`;
-				});
-				app.addEventListener('wordSucceed', function updateSucceedCount(event) {
-					const currentSucceedCount = new Number(succeedCountElement.textContent);
-					succeedCountElement.textContent = currentSucceedCount + 1;
+				}
 
-					if (event && event.detail) {
-						updateWord(event.detail);
-					}
-				});
-				app.addEventListener('wordFailed', function updateFailedCount(event) {
-					const currentFailedCount = new Number(failedCountElement.textContent);
-					failedCountElement.textContent = currentFailedCount + 1;
+				function wordSucceedHandler(event) {
+					const currentSucceedCount = new Number(nbOfSucceedElement.textContent);
+					nbOfSucceedElement.textContent = currentSucceedCount + 1;
+				}
 
-					if (event && event.detail) {
-						updateWord(event.detail);
-					}
-				});
+				function wordFailedHandler(event) {
+					const currentFailedCount = new Number(nbOfFailedElement.textContent);
+					nbOfFailedElement.textContent = currentFailedCount + 1;
+				}
 			}
 		};	
 
@@ -455,7 +546,7 @@
 			createDeck: function(wordsCount) {
 				let deck;
 
-				if (version.hasImages) {
+				if (hasImages) {
 					deck = Object.keys(version.dictionary);	
 				} else {
 					deck = [...version.dictionary];
@@ -472,19 +563,18 @@
 		// ----------------- TIMER ------------------
 
 		function startTimer() {
-			const {
-				timer
+			let {
+				timerRemaining
 			} = state;
 
-			timer.remaining = timer.max;
+			timerRemaining = version.timer;
 
 			const now = new Date().getTime();
-			timer.end = now + (timer.remaining * 1000);
-			timer.remaining--;
+			timerEnd = now + (timerRemaining * 1000);
 
-			timerRemainingElement.innerHTML = `${timer.remaining}&#8239;<span aria-label="seconds">s</span>`
+			timerRemainingElement.innerHTML = `${timerRemaining}&#8239;<span aria-label="seconds">s</span>`
 
-			timerHandle = setInterval(countdown, 1000);
+			timerHandle = setInterval(countdown, 750);
 		}
 
 		function stopTimer() {
@@ -493,24 +583,30 @@
 
 		function countdown() {
 			const now = new Date().getTime();
-			const {
-				timer
+			let {
+				timerRemaining
 			} = state;
 
-			timer.remaining = Math.trunc((timer.end - now)/1000);
+			const newTimerRemaining = Math.trunc((timerEnd - now)/1000);
 
-			if (timer.remaining < 10 && timer.remaining >= 0) {
+			if (timerRemaining === newTimerRemaining) {
+				return;
+			}
+
+			timerRemaining = newTimerRemaining;
+
+			if (timerRemaining < 10 && timerRemaining >= 0) {
 				tickSound.currentTime = 0;
 				tickSound.play();
 			}
 
-			timerElement.dispatchEvent(new CustomEvent('update', {
+			app.dispatchEvent(new CustomEvent('updateTimer', {
 				detail: {
-					remaining: timer.remaining
+					remaining: timerRemaining
 				}
 			}));
 
-			if (timer.remaining <= 0) {
+			if (timerRemaining <= 0) {
 				clearInterval(timerHandle);
 				timeIsUpSound.currentTime = 0;
 				timeIsUpSound.play();
@@ -591,7 +687,7 @@
 					[array[i], array[j]] = [array[j], array[i]];
 				}
 			},
-			computeRanks: function({roundsCount, teams}) {
+			computeRanks: function(roundsCount, teams) {
 				const totalScores = {};
 
 				teams.forEach(function computeEndOfGameScores(team, index) {
@@ -616,10 +712,7 @@
 		};
 
 		return {
-			init,
-			onWordSucceed,
-			onWordFailed,
-			onStopTurn
+			init
 		};
 	})();
 
@@ -627,19 +720,4 @@
 
 	TimesUp.init(app);
 
-	app.querySelector('#succeed').addEventListener('click', function succeed(event) {
-		event.preventDefault();
-		TimesUp.onWordSucceed();
-	});
-
-	app.querySelector('#failed').addEventListener('click', function failed(event) {
-		event.preventDefault();
-		TimesUp.onWordFailed();
-	});
-
-	app.querySelector('#stop').addEventListener('click', function stop(event) {
-		event.preventDefault();
-
-		TimesUp.onStopTurn();
-	});
 })(window, document, undefined);
