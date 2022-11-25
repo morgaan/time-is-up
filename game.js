@@ -33,6 +33,7 @@
 		let dialog;
 		let dialogMask;
 		let dialogWindow;
+		let dialogOnCloseCallback;
 
 		let timerHandle;
 		let timerEnd = null;
@@ -155,7 +156,6 @@
 
 			infoDialog(`Fin de la manche ${currentRound.count}`, dialogMessage, 'OK !', function proceedToNextRoundOrEndOfGame() {
 				if (currentRound.count === numberOfRounds) {
-					// setTimeout(0, endOfGame);
 					endOfGame();
 				} else {
 					STATE.nextRound();
@@ -418,7 +418,8 @@
 					currentTurn,
 					teams,
 					currentRound,
-					wordUnderGuess
+					wordUnderGuess,
+					timer
 				} = state;
 				const dictionaryEntry = settings.gameVersion.dictionary[wordUnderGuess];
 
@@ -608,9 +609,8 @@
 			dialogWindow.querySelector('#dialog-button').textContent = buttonLabel;
 
 			const button = dialogWindow.querySelector('#dialog-button');
-			button.addEventListener('click', function closeDialogHandler () {
-				closeDialog(callback)
-			});
+			dialogOnCloseCallback = callback;
+			button.addEventListener('click', closeDialog);
 
 			openDialog();
 		}
@@ -633,7 +633,7 @@
 			dialog.querySelector('button').focus();
 		}
 
-		function closeDialog(dialogOnCloseCallback) {
+		function closeDialog() {
 			dialogMask.removeEventListener('click', closeDialog);
 			dialogWindow.querySelector('button').removeEventListener('click', closeDialog);
 			document.removeEventListener('keydown', checkCloseDialog);
