@@ -67,6 +67,11 @@
 		// ------------------ INIT  ---------------
 
 		function init(app) {
+			// These 2 magic lines address delay issue when playing sound in Safari
+			// Reference: https://stackoverflow.com/questions/9811429/html5-audio-tag-on-safari-has-a-delay/54119854#54119854
+			const AudioContext = window.AudioContext || window.webkitAudioContext;
+			new AudioContext();
+
 			UI.queryAllElements();
 
 			numberOfRounds = settings.gameVersion.roundsName.length;
