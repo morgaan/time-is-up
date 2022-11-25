@@ -1,9 +1,12 @@
 // TODO Swap alerts with dialogs
 (function(window, document, undefined) {
 	const TimesUp = (function() {
-		const version = JSON.parse(window.localStorage.getItem('version'));
-		const teamsCount = Number.parseInt(window.localStorage.getItem('teamsCount'));
-		const wordsCount = Number.parseInt(window.localStorage.getItem('wordsCount'));
+		const settings = {
+			gameVersion: JSON.parse(window.localStorage.getItem('gameVersion')),
+			nbOfTeams: Number.parseInt(window.localStorage.getItem('nbOfTeams')),
+			nbOfWordsToGuess: Number.parseInt(window.localStorage.getItem('nbOfWordsToGuess')),
+		};
+
 		let roundsCount;
 		let gameDeck;
 		let hasImages;
@@ -11,7 +14,7 @@
 
 		let liveRegionElement;
 		let teamPlayingElement;
-		let teamsCountElement;
+		let nbOfTeamsElement;
 		let currentRoundElement;
 		let nbOfRoundsElement;
 		let nbOfWordsLeftToSucceedElement;
@@ -59,16 +62,16 @@
 			}
 		};
 
-		let wordsToSucceedCount = wordsCount;
+		let wordsToSucceedCount = settings.nbOfWordsToGuess;
 
 		// ------------------ INIT  ---------------
 
 		function init(app) {
 			UI.queryAllElements();
 
-			roundsCount = version.rounds.length;
-			hasImages = version.hasImages;
-			gameDeck = GAME.createDeck(wordsCount);
+			roundsCount = settings.gameVersion.rounds.length;
+			hasImages = settings.gameVersion.hasImages;
+			gameDeck = GAME.createDeck(settings.nbOfWordsToGuess);
 
 			STATE.init();
 			UI.setupBoard();
@@ -88,7 +91,7 @@
 		function endOfTurn() {
 			stopTimer();
 
-			const {rounds} = version;
+			const {rounds} = settings.gameVersion;
 			const {
 				wordsToSucceed,
 				currentRound,
@@ -204,7 +207,7 @@
 
 				app.dispatchEvent(new CustomEvent('wordFailed', {
 					detail: {
-						dictionaryEntry: version.dictionary[newWord],
+						dictionaryEntry: settings.gameVersion.dictionary[newWord],
 						newWord
 					}
 				}));
@@ -240,7 +243,7 @@
 
 				app.dispatchEvent(new CustomEvent('wordSucceed', {
 					detail: {
-						dictionaryEntry: version.dictionary[newWord],
+						dictionaryEntry: settings.gameVersion.dictionary[newWord],
 						newWord
 					}
 				}));
@@ -266,7 +269,7 @@
 
 		const STATE = {
 			init: function() {
-				const {rounds, timer} = version;
+				const {rounds, timer} = settings.gameVersion;
 
 				// Proposal state:
 				//
@@ -310,7 +313,7 @@
 
 				const teams = [];
 
-				for (i = 0; i < teamsCount; i++) {
+				for (i = 0; i < settings.nbOfTeams; i++) {
 					const pointsPerRound = [];
 			
 					for (j = 0; j < roundsCount; j++) {
@@ -347,7 +350,7 @@
 							}
 
 							if (prop === 'wordUnderGuess') {
-								const dictionaryEntry = version.dictionary[newValue];
+								const dictionaryEntry = settings.gameVersion.dictionary[newValue];
 
 								obj[prop] = newValue;
 								UI.updateWord(newValue, dictionaryEntry);
@@ -378,7 +381,7 @@
 				}
 			},
 			nextRound: function () {
-				const {rounds} = version;
+				const {rounds} = settings.gameVersion;
 				const {
 					currentRound,
 					currentTurn
@@ -403,7 +406,7 @@
 			queryAllElements: function() {
 				liveRegionElement = document.querySelector('#live-region');
 				teamPlayingElement = app.querySelector('#teamPlaying');
-				teamsCountElement = app.querySelector('#nbOfTeams');
+				nbOfTeamsElement = app.querySelector('#nbOfTeams');
 				currentRoundElement = app.querySelector('#currentRound');
 				nbOfRoundsElement = app.querySelector('#nbOfRounds');
 				nbOfWordsLeftToSucceedElement = app.querySelector('#nbOfWordsLeftToSucceed');
@@ -433,17 +436,17 @@
 					wordUnderGuess,
 					timer
 				} = state;
-				const dictionaryEntry = version.dictionary[wordUnderGuess];
+				const dictionaryEntry = settings.gameVersion.dictionary[wordUnderGuess];
 
 				teamPlayingElement.innerText = currentTurn.team;
-				teamsCountElement.innerText = teams.length;
+				nbOfTeamsElement.innerText = teams.length;
 				currentRoundElement.innerText = currentRound.count;
 				nbOfRoundsElement.innerText = roundsCount;
 				nbOfSucceedElement.innerText = currentTurn.wordsSucceed.length;
 				nbOfWordsLeftToSucceedElement.innerText = wordsToSucceedCount;
 				nbOfFailedElement.innerText = currentTurn.wordsFailed.length;
 				timerVisualElement.style.setProperty('--timer-visual-width', `100%`);
-				timerRemainingElement.innerHTML = `${version.timer}&#8239;<span aria-label="seconds">s</span>`
+				timerRemainingElement.innerHTML = `${settings.gameVersion.timer}&#8239;<span aria-label="seconds">s</span>`
 
 				if (hasImages && !wordImageElement) {
 					const imgElement = document.createElement('img');
@@ -513,7 +516,7 @@
 
 				function updateTimerHandler(event) {
 					const remaining = event.detail.remaining;
-					const percentage = Math.trunc((remaining * 100) / version.timer);
+					const percentage = Math.trunc((remaining * 100) / settings.gameVersion.timer);
 					timerVisualElement.style.setProperty('--timer-visual-width', `${percentage}%`);
 					timerRemainingElement.innerHTML = `${remaining}&#8239;<span aria-label="second${remaining === 1 ? '' : 's'}">s</span>`;
 				}
@@ -543,18 +546,18 @@
 		// -------------------- GAME ------------------
 
 		const GAME = {
-			createDeck: function(wordsCount) {
+			createDeck: function(nbOfWordsToGuess) {
 				let deck;
 
 				if (hasImages) {
-					deck = Object.keys(version.dictionary);	
+					deck = Object.keys(settings.gameVersion.dictionary);	
 				} else {
-					deck = [...version.dictionary];
+					deck = [...settings.gameVersion.dictionary];
 				}
 
 				UTILS.shuffle(deck);
 
-				deck = deck.splice(0, wordsCount);
+				deck = deck.splice(0, nbOfWordsToGuess);
 
 				return deck;
 			}
@@ -567,7 +570,7 @@
 				timerRemaining
 			} = state;
 
-			timerRemaining = version.timer;
+			timerRemaining = settings.gameVersion.timer;
 
 			const now = new Date().getTime();
 			timerEnd = now + (timerRemaining * 1000);

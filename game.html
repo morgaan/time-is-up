@@ -91,11 +91,11 @@
 			(function(document, window){
 				document.addEventListener('DOMContentLoaded', function loadConfig() {
 					const searchParams = new URLSearchParams(location.search); 
-					window.localStorage.setItem('teamsCount', searchParams.get('teams-count'));
-					window.localStorage.setItem('wordsCount', searchParams.get('words-count'));
+					window.localStorage.setItem('nbOfTeams', searchParams.get('nbOfTeams'));
+					window.localStorage.setItem('nbOfWordsToGuess', searchParams.get('nbOfWordsToGuess'));
 					
 					const versionScript = document.createElement('script');
-					versionScript.src = `./version-${searchParams.get('version')}.js`;
+					versionScript.src = `./version-${searchParams.get('gameVersion')}.js`;
 					document.querySelector('body').appendChild(versionScript);
 
 					const gameScript = document.createElement('script');
