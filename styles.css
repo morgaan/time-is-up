@@ -280,6 +280,7 @@ figcaption {
 	border-radius: 6px;
 	padding: 1rem;
 	background: #27284c;
+	min-width: 300px;
 }
 
 .c-dialog__window > h2 {
