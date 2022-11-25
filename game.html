@@ -29,22 +29,22 @@
 
 			<div class="c-box c-round">
 				<h2>Manche</h2>
-				<span id="currentRound"></span>/<span id="nbOfRounds"></span></h2>
+				<span id="currentRound"></span>/<span id="numberOfRounds"></span></h2>
 			</div>
 
 			<div class="c-box c-team">
 				<h2>Equipe</h2>
-				<span id="teamPlaying"></span>/<span id="nbOfTeams"></span><br><br>
+				<span id="teamPlaying"></span>/<span id="numberOfTeams"></span><br><br>
 			</div>
 
 			<div class="c-box c-failed">
 				<h2>Echoués</h2>
-				<span id="nbOfFailed"></span>
+				<span id="numberOfFailed"></span>
 			</div>
 
 			<div class="c-box c-succeed">
 				<h2>Trouvés</h2>
-				<span id="nbOfSucceed"></span>/<span id="nbOfWordsLeftToSucceed"></span>
+				<span id="numberOfSucceed"></span>/<span id="numberOfWordsLeftToSucceed"></span>
 			</div>
 
 			<button class="c-stop c-button c-button--stop" id="stop">
@@ -91,8 +91,8 @@
 			(function(document, window){
 				document.addEventListener('DOMContentLoaded', function loadConfig() {
 					const searchParams = new URLSearchParams(location.search); 
-					window.localStorage.setItem('nbOfTeams', searchParams.get('nbOfTeams'));
-					window.localStorage.setItem('nbOfWordsToGuess', searchParams.get('nbOfWordsToGuess'));
+					window.localStorage.setItem('numberOfTeams', searchParams.get('numberOfTeams'));
+					window.localStorage.setItem('numberOfWordsToGuess', searchParams.get('numberOfWordsToGuess'));
 					
 					const versionScript = document.createElement('script');
 					versionScript.src = `./version-${searchParams.get('gameVersion')}.js`;

@@ -1,7 +1,7 @@
 const gameVersion = {
 	hasImages: true,
 	timer: 60,
-	rounds: [
+	roundsName: [
 		'freeSpeech',
 		'mimeAndSounds'
 	],

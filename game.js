@@ -3,23 +3,23 @@
 	const TimesUp = (function() {
 		const settings = {
 			gameVersion: JSON.parse(window.localStorage.getItem('gameVersion')),
-			nbOfTeams: Number.parseInt(window.localStorage.getItem('nbOfTeams')),
-			nbOfWordsToGuess: Number.parseInt(window.localStorage.getItem('nbOfWordsToGuess')),
+			numberOfTeams: Number.parseInt(window.localStorage.getItem('numberOfTeams')),
+			numberOfWordsToGuess: Number.parseInt(window.localStorage.getItem('numberOfWordsToGuess')),
 		};
 
-		let roundsCount;
+		let numberOfRounds;
 		let gameDeck;
 		let hasImages;
 		let state;
 
 		let liveRegionElement;
 		let teamPlayingElement;
-		let nbOfTeamsElement;
+		let numberOfTeamsElement;
 		let currentRoundElement;
-		let nbOfRoundsElement;
-		let nbOfWordsLeftToSucceedElement;
-		let nbOfSucceedElement;
-		let nbOfFailedElement;
+		let numberOfRoundsElement;
+		let numberOfWordsLeftToSucceedElement;
+		let numberOfSucceedElement;
+		let numberOfFailedElement;
 		let wordElement;
 		let wordImageElement;
 		let succeedButtonElement;
@@ -62,20 +62,20 @@
 			}
 		};
 
-		let wordsToSucceedCount = settings.nbOfWordsToGuess;
+		let wordsToSucceedCount = settings.numberOfWordsToGuess;
 
 		// ------------------ INIT  ---------------
 
 		function init(app) {
 			UI.queryAllElements();
 
-			roundsCount = settings.gameVersion.rounds.length;
+			numberOfRounds = settings.gameVersion.roundsName.length;
 			hasImages = settings.gameVersion.hasImages;
-			gameDeck = GAME.createDeck(settings.nbOfWordsToGuess);
+			gameDeck = GAME.createDeck(settings.numberOfWordsToGuess);
 
 			STATE.init();
-			UI.setupBoard();
 			STATE.proxify();
+			UI.setupBoard();
 
 			// Swaps Loading... with the actual app.
 			app.removeAttribute('style');
@@ -91,7 +91,7 @@
 		function endOfTurn() {
 			stopTimer();
 
-			const {rounds} = settings.gameVersion;
+			const {roundsName} = settings.gameVersion;
 			const {
 				wordsToSucceed,
 				currentRound,
@@ -108,7 +108,7 @@
 			state.currentTurn.wordsFailed = [];
 
 			if (wordsToSucceed.length > 0) {
-				const roundName = rounds[currentRound.count-1];
+				const roundName = roundsName[currentRound.count-1];
 				const roundDetails = roundRules[roundName];
 
 				if (roundDetails.shuffle) {
@@ -157,12 +157,12 @@
 
 			alert(message);
 
-			if (currentRound.count === roundsCount) {
+			if (currentRound.count === numberOfRounds) {
 				endOfGame();
 			} else {
 				STATE.nextRound();
 
-				if (currentRound.count <= roundsCount) {
+				if (currentRound.count <= numberOfRounds) {
 					UI.setupBoard();
 					startOfRound();
 				}
@@ -170,7 +170,7 @@
 		}
 
 		function endOfGame() {
-			const totalScores = UTILS.computeRanks(roundsCount, state.teams);
+			const totalScores = UTILS.computeRanks(numberOfRounds, state.teams);
 
 			message = 'Fin de la partie, voici le classement\n\n';
 
@@ -269,14 +269,14 @@
 
 		const STATE = {
 			init: function() {
-				const {rounds, timer} = settings.gameVersion;
+				const {roundsName, timer} = settings.gameVersion;
 
 				// Proposal state:
 				//
 				// turnState = {
 				//	wordUnderGuess: gameDeck[0],
-				//	nbOfSucceed: 0,
-				//	nbOfFailed: 0,
+				//	numberOfSucceed: 0,
+				//	numberOfFailed: 0,
 				//	timerRemaining: timer,
 				// }
 				//
@@ -302,7 +302,7 @@
 					wordsToSucceed: [...gameDeck],
 					currentRound: {
 						count: 1,
-						...roundRules[rounds[0]]
+						...roundRules[roundsName[0]]
 					},
 					currentTurn: {
 						team: 1,
@@ -313,10 +313,10 @@
 
 				const teams = [];
 
-				for (i = 0; i < settings.nbOfTeams; i++) {
+				for (i = 0; i < settings.numberOfTeams; i++) {
 					const pointsPerRound = [];
 			
-					for (j = 0; j < roundsCount; j++) {
+					for (j = 0; j < numberOfRounds; j++) {
 						pointsPerRound.push(0);
 					}
 
@@ -381,14 +381,14 @@
 				}
 			},
 			nextRound: function () {
-				const {rounds} = settings.gameVersion;
+				const {roundsName} = settings.gameVersion;
 				const {
 					currentRound,
 					currentTurn
 				} = state;
 
 				currentRound.count++;
-				const newRoundName = rounds[currentRound.count-1];
+				const newRoundName = roundsName[currentRound.count-1];
 				const newRoundDetails = roundRules[newRoundName];
 				currentRound.rule = newRoundDetails.rule;
 				currentRound.wordSkipAllowed = newRoundDetails.wordSkipAllowed;
@@ -406,12 +406,12 @@
 			queryAllElements: function() {
 				liveRegionElement = document.querySelector('#live-region');
 				teamPlayingElement = app.querySelector('#teamPlaying');
-				nbOfTeamsElement = app.querySelector('#nbOfTeams');
+				numberOfTeamsElement = app.querySelector('#numberOfTeams');
 				currentRoundElement = app.querySelector('#currentRound');
-				nbOfRoundsElement = app.querySelector('#nbOfRounds');
-				nbOfWordsLeftToSucceedElement = app.querySelector('#nbOfWordsLeftToSucceed');
-				nbOfSucceedElement = app.querySelector('#nbOfSucceed');
-				nbOfFailedElement = app.querySelector('#nbOfFailed');
+				numberOfRoundsElement = app.querySelector('#numberOfRounds');
+				numberOfWordsLeftToSucceedElement = app.querySelector('#numberOfWordsLeftToSucceed');
+				numberOfSucceedElement = app.querySelector('#numberOfSucceed');
+				numberOfFailedElement = app.querySelector('#numberOfFailed');
 				wordElement = app.querySelector('#word');
 				succeedButtonElement = app.querySelector('#succeed');
 				failedButtonElement = app.querySelector('#failed');
@@ -439,12 +439,12 @@
 				const dictionaryEntry = settings.gameVersion.dictionary[wordUnderGuess];
 
 				teamPlayingElement.innerText = currentTurn.team;
-				nbOfTeamsElement.innerText = teams.length;
+				numberOfTeamsElement.innerText = teams.length;
 				currentRoundElement.innerText = currentRound.count;
-				nbOfRoundsElement.innerText = roundsCount;
-				nbOfSucceedElement.innerText = currentTurn.wordsSucceed.length;
-				nbOfWordsLeftToSucceedElement.innerText = wordsToSucceedCount;
-				nbOfFailedElement.innerText = currentTurn.wordsFailed.length;
+				numberOfRoundsElement.innerText = numberOfRounds;
+				numberOfSucceedElement.innerText = currentTurn.wordsSucceed.length;
+				numberOfWordsLeftToSucceedElement.innerText = wordsToSucceedCount;
+				numberOfFailedElement.innerText = currentTurn.wordsFailed.length;
 				timerVisualElement.style.setProperty('--timer-visual-width', `100%`);
 				timerRemainingElement.innerHTML = `${settings.gameVersion.timer}&#8239;<span aria-label="seconds">s</span>`
 
@@ -522,13 +522,13 @@
 				}
 
 				function wordSucceedHandler(event) {
-					const currentSucceedCount = new Number(nbOfSucceedElement.textContent);
-					nbOfSucceedElement.textContent = currentSucceedCount + 1;
+					const currentSucceedCount = new Number(numberOfSucceedElement.textContent);
+					numberOfSucceedElement.textContent = currentSucceedCount + 1;
 				}
 
 				function wordFailedHandler(event) {
-					const currentFailedCount = new Number(nbOfFailedElement.textContent);
-					nbOfFailedElement.textContent = currentFailedCount + 1;
+					const currentFailedCount = new Number(numberOfFailedElement.textContent);
+					numberOfFailedElement.textContent = currentFailedCount + 1;
 				}
 			}
 		};	
@@ -546,7 +546,7 @@
 		// -------------------- GAME ------------------
 
 		const GAME = {
-			createDeck: function(nbOfWordsToGuess) {
+			createDeck: function(numberOfWordsToGuess) {
 				let deck;
 
 				if (hasImages) {
@@ -557,7 +557,7 @@
 
 				UTILS.shuffle(deck);
 
-				deck = deck.splice(0, nbOfWordsToGuess);
+				deck = deck.splice(0, numberOfWordsToGuess);
 
 				return deck;
 			}
@@ -690,12 +690,12 @@
 					[array[i], array[j]] = [array[j], array[i]];
 				}
 			},
-			computeRanks: function(roundsCount, teams) {
+			computeRanks: function(numberOfRounds, teams) {
 				const totalScores = {};
 
 				teams.forEach(function computeEndOfGameScores(team, index) {
 					let totalScore = 0;
-					for (let i = 0; i < roundsCount; i++) {
+					for (let i = 0; i < numberOfRounds; i++) {
 						totalScore += team.pointsPerRound[i];
 					}
 					totalScores[`Equipe ${index+1}`] = totalScore;
