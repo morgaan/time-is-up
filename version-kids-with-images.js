@@ -1,7 +1,7 @@
-const version = {
+const gameVersion = {
 	hasImages: true,
 	timer: 60,
-	rounds: [
+	roundsName: [
 		'freeSpeech',
 		'mimeAndSounds'
 	],
@@ -826,5 +826,5 @@ const version = {
 };
 
 (function(document, window){
-	window.localStorage.setItem('version', JSON.stringify(version));
+	window.localStorage.setItem('gameVersion', JSON.stringify(gameVersion));
 })(document, window);

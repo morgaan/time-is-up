@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="fr">
 	<head>
 		<meta charset="UTF-8">
@@ -29,31 +28,30 @@
 
 			<div class="c-box c-round">
 				<h2>Manche</h2>
-				<span id="currentRound"></span>/<span id="roundsCount"></span></h2>
+				<span id="currentRound"></span>/<span id="numberOfRounds"></span></h2>
 			</div>
 
 			<div class="c-box c-team">
 				<h2>Equipe</h2>
-				<span id="currentTurnTeam"></span>/<span id="teamsCount"></span><br><br>
+				<span id="teamPlaying"></span>/<span id="numberOfTeams"></span><br><br>
 			</div>
 
-			<div class="c-box c-skipped">
-				<h2>Passés</h2>
-				<span id="passedCount"></span>
+			<div class="c-box c-failed">
+				<h2>Echoués</h2>
+				<span id="numberOfFailed"></span>
 			</div>
 
-
-			<div class="c-box c-guessed">
+			<div class="c-box c-succeed">
 				<h2>Trouvés</h2>
-				<span id="guessedCount"></span>/<span id="currentTurnWordsToGuessedCount"></span>
+				<span id="numberOfSucceed"></span>/<span id="numberOfWordsLeftToSucceed"></span>
 			</div>
 
 			<button class="c-stop c-button c-button--stop" id="stop">
 				<img src="./images/icons/stop.svg" alt="Stop">
 			</button>
 
-			<button class="c-skip c-button c-button--skip" id="skip">
-				<img src="./images/icons/thumbs-down.svg" alt="Passe">
+			<button class="c-failed-button c-button c-button--failed" id="failed">
+				<img src="./images/icons/thumbs-down.svg" alt="Echoué">
 			</button>
 
 			<div class="c-box c-timer" role="timer" id="timer" aria-atomic="true">
@@ -67,15 +65,10 @@
 				</div>
 			</div>
 
-			<button class="c-succeed c-button c-button--succeed" id="succeed">
+			<button class="c-succeed-button c-button c-button--succeed" id="succeed">
 				<img src="./images/icons/thumbs-up.svg" alt="Trouvé">
 			</button>
 		</div>
-		<audio id="time-is-up-sound" preload="auto" src="audio-clips/time-is-up.mp3"></audio>
-		<audio id="skipped-sound" preload="auto" src="audio-clips/skipped.mp3"></audio>
-		<audio id="guessed-sound" preload="auto" src="audio-clips/guessed.mp3"></audio>
-		<audio id="stop-sound" preload="auto" src="audio-clips/stop.mp3"></audio>
-		<audio id="tick-sound" preload="auto" src="audio-clips/tick.mp3"></audio>
 
 		<div role="dialog" class="c-dialog" aria-labelledby="dialog-title" aria-modal="true" id="dialog">
 			<div class="c-dialog__window" id="dialog-window">
@@ -92,11 +85,11 @@
 			(function(document, window){
 				document.addEventListener('DOMContentLoaded', function loadConfig() {
 					const searchParams = new URLSearchParams(location.search); 
-					window.localStorage.setItem('teamsCount', searchParams.get('teams-count'));
-					window.localStorage.setItem('wordsCount', searchParams.get('words-count'));
+					window.localStorage.setItem('numberOfTeams', searchParams.get('numberOfTeams'));
+					window.localStorage.setItem('numberOfWordsToGuess', searchParams.get('numberOfWordsToGuess'));
 					
 					const versionScript = document.createElement('script');
-					versionScript.src = `./version-${searchParams.get('version')}.js`;
+					versionScript.src = `./version-${searchParams.get('gameVersion')}.js`;
 					document.querySelector('body').appendChild(versionScript);
 
 					const gameScript = document.createElement('script');
