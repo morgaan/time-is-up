@@ -1,3 +1,57 @@
+// The browser will limit the number of concurrent audio contexts
+// So be sure to re-use them whenever you can
+//
+// The magic fallback address delay issue when playing sound in Safari
+// Reference: https://stackoverflow.com/questions/9811429/html5-audio-tag-on-safari-has-a-delay/54119854#54119854
+const AudioContext = window.AudioContext || window.webkitAudioContext;
+const myAudioContext = new AudioContext();
+
+/**
+ * Helper function to emit a beep sound in the browser using the Web Audio API.
+ * Source: https://ourcodeworld.com/articles/read/1627/how-to-easily-generate-a-beep-notification-sound-with-javascript
+ * 
+ * @param {number} duration - The duration of the beep sound in milliseconds.
+ * @param {number} frequency - The frequency of the beep sound.
+ * @param {number} volume - The volume of the beep sound.
+ * 
+ * @returns {Promise} - A promise that resolves when the beep sound is finished.
+ */
+function beep(duration, frequency, volume){
+    return new Promise((resolve, reject) => {
+        // Set default duration if not provided
+        duration = duration || 200;
+        frequency = frequency || 440;
+        volume = volume || 100;
+
+        try{
+            let oscillatorNode = myAudioContext.createOscillator();
+            let gainNode = myAudioContext.createGain();
+            oscillatorNode.connect(gainNode);
+
+            // Set the oscillator frequency in hertz
+            oscillatorNode.frequency.value = frequency;
+
+            // Set the type of oscillator
+            oscillatorNode.type= "square";
+            gainNode.connect(myAudioContext.destination);
+
+            // Set the gain to the volume
+            gainNode.gain.value = volume * 0.01;
+
+            // Start audio with the desired duration
+            oscillatorNode.start(myAudioContext.currentTime);
+            oscillatorNode.stop(myAudioContext.currentTime + duration * 0.001);
+
+            // Resolve the promise when the sound is finished
+            oscillatorNode.onended = () => {
+                resolve();
+            };
+        }catch(error){
+            reject(error);
+        }
+    });
+}
+
 // TODO Swap alerts with dialogs
 (function(window, document, undefined) {
 	const TimesUp = (function() {
@@ -38,12 +92,6 @@
 		let timerHandle;
 		let timerEnd = null;
 
-		let timeIsUpSound;
-		let failedSound;
-		let succeedSound;
-		let stopSound;
-		let tickSound;
-
 		const roundRules = {
 			freeSpeech: {
 				rule: `L'orateur parle librement et son équipe fait autant de propositions que nécessaire.`,
@@ -69,8 +117,8 @@
 		function init(app) {
 			// These 2 magic lines address delay issue when playing sound in Safari
 			// Reference: https://stackoverflow.com/questions/9811429/html5-audio-tag-on-safari-has-a-delay/54119854#54119854
-			const AudioContext = window.AudioContext || window.webkitAudioContext;
-			new AudioContext();
+			// const AudioContext = window.AudioContext || window.webkitAudioContext;
+			// new AudioContext();
 
 			UI.queryAllElements();
 
@@ -140,8 +188,6 @@
 			message += `<p>C'est au tour de l'équipe ${state.currentTurn.team}</p>`;
 
 			infoDialog(`Début de la manche ${currentRound.count}`, message, 'Commençer !', function startTimerCallback() {
-				AUDIO.setupSound(tickSound);
-				AUDIO.setupSound(timeIsUpSound);
 				startTimer();
 			});
 		}
@@ -228,8 +274,7 @@
 				}));
 			}
 
-			failedSound.currentTime = 0;
-			failedSound.play();
+			AUDIO.failedSound();
 
 			if (totalPlayed === wordsToSucceedCount) {
 				endOfTurn();
@@ -264,8 +309,7 @@
 				}));
 			}
 
-			succeedSound.currentTime = 0;
-			succeedSound.play();
+			AUDIO.succeedSound();
 
 			if (totalPlayed === wordsToSucceedCount) {
 				endOfTurn();
@@ -274,8 +318,7 @@
 		}
 
 		function onStopTurn() {
-			stopSound.currentTime = 0;
-			stopSound.play();
+			AUDIO.stopSound();
 
 			endOfTurn();
 		}
@@ -409,11 +452,6 @@
 				timerElement = app.querySelector('#timer');
 				timerVisualElement = timerElement.querySelector('#timer-visual');
 				timerRemainingElement = timerElement.querySelector('#timer-remaining');
-				timeIsUpSound = document.querySelector('#time-is-up-sound');
-				failedSound = document.querySelector('#failed-sound');
-				succeedSound = document.querySelector('#succeed-sound');
-				stopSound = document.querySelector('#stop-sound');
-				tickSound = document.querySelector('#tick-sound');
 				dialog = document.querySelector('#dialog');
 				dialogMask = dialog.querySelector('#dialog-mask');
 				dialogWindow = dialog.querySelector('#dialog-window');
@@ -443,7 +481,7 @@
 						const {img} = settings.gameVersion.dictionary[word];
 						const href = `./images/${img}`;
 						const linkElement = document.createElement('link');
-						linkElement.rel = 'preload';
+						linkElement.rel = 'image preload';
 						linkElement.href = href;
 						linkElement.as = 'image';
 						linkElement.type = "image/svg+xml";
@@ -538,10 +576,20 @@
 		// -------------------- AUDIO ------------------
 
 		const AUDIO = {
-			setupSound: function(sound) {
-				sound.play();
-				sound.pause();
-				sound.currentTime = 0;
+			timeIsUpSound: function () {
+				beep(250, 150, 100).then(() => beep(300, 100, 100)).then(() =>beep(400, 80, 100)).then(() =>beep(1500, 50, 100));
+			},
+			failedSound: function () {
+				beep(100, 100, 100).then(() => beep(100, 400, 100)).then(() =>beep(100, 100, 100));
+			},
+			succeedSound: function () {
+				beep(60, 600, 100).then(() => beep(100, 800, 100));
+			},
+			stopSound: function () {
+				beep(120, 300, 100).then(() =>beep(200, 100, 100));
+			},
+			tickSound: function () {
+				beep(100, 180, 100);
 			}
 		};
 
@@ -601,8 +649,7 @@
 			timerRemaining = newTimerRemaining;
 
 			if (timerRemaining < 10 && timerRemaining >= 0) {
-				tickSound.currentTime = 0;
-				tickSound.play();
+				AUDIO.tickSound();
 			}
 
 			app.dispatchEvent(new CustomEvent('updateTimer', {
@@ -613,8 +660,7 @@
 
 			if (timerRemaining <= 0) {
 				clearInterval(timerHandle);
-				timeIsUpSound.currentTime = 0;
-				timeIsUpSound.play();
+				AUDIO.timeIsUpSound();
 				endOfTurn();
 			}
 		}
