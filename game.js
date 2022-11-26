@@ -220,6 +220,8 @@ function beep(duration, frequency, volume){
 		}
 
 		function endOfGame() {
+			AUDIO.endOfGameSound();
+
 			const totalScores = UTILS.computeRanks(numberOfRounds, state.teams);
 			let dialogMessage = '';
 
@@ -589,7 +591,10 @@ function beep(duration, frequency, volume){
 				beep(120, 300, 100).then(() =>beep(200, 100, 100));
 			},
 			tickSound: function () {
-				beep(100, 180, 100);
+				beep(120, 180, 100);
+			},
+			endOfGameSound: function () {
+				beep(150, 1000, 100).then(() => beep(200, 1500, 100)).then(() =>beep(400, 2000, 100)).then(() =>beep(500, 2500, 100)).then(beep(250, 1000, 100).then(() => beep(300, 1500, 100)).then(() =>beep(400, 2000, 100))).then(() =>beep(400, 2000, 100)).then(() =>beep(500, 2500, 100)).then(beep(250, 1000, 100));
 			}
 		};
 
