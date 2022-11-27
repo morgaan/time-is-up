@@ -205,6 +205,12 @@ figcaption {
 	align-items: center;
 }
 
+.c-word__word {
+	font-weight: bold;
+	font-size: 8vh;
+	text-align: center;
+}
+
 .c-word__image {
 	width: auto;
 	max-height: 40vh;

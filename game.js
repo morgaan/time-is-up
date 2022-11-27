@@ -76,6 +76,7 @@ function beep(duration, frequency, volume){
 		let numberOfFailedElement;
 		let wordElement;
 		let wordImageElement;
+		let wordWordElement;
 		let succeedButtonElement;
 		let stopButtonElement;
 		let failedButtonElement;
@@ -466,7 +467,6 @@ function beep(duration, frequency, volume){
 					wordUnderGuess,
 					wordsToSucceed
 				} = state;
-				const dictionaryEntry = settings.gameVersion.dictionary[wordUnderGuess];
 
 				teamPlayingElement.innerText = currentTurn.team;
 				numberOfTeamsElement.innerText = teams.length;
@@ -477,6 +477,8 @@ function beep(duration, frequency, volume){
 				numberOfFailedElement.innerText = currentTurn.wordsFailed.length;
 				timerVisualElement.style.setProperty('--timer-visual-width', `100%`);
 				timerRemainingElement.innerHTML = `${settings.gameVersion.timer}&#8239;<span aria-label="seconds">s</span>`
+
+				let dictionaryEntry = hasImages ? settings.gameVersion.dictionary[wordUnderGuess] : wordUnderGuess;
 
 				if (hasImages) {
 					wordsToSucceed.forEach(function appendLinkToPrefetchImage(word) {
@@ -502,6 +504,14 @@ function beep(duration, frequency, volume){
 				} else if (hasImages && wordImageElement) {
 					wordImageElement.src = `./images/${dictionaryEntry.img}`;
 					wordImageElement.alt = `${wordUnderGuess}${wordUnderGuess !== dictionaryEntry.desc ? `: ${dictionaryEntry.desc}` : wordUnderGuess}`;
+				} else if (!hasImages && !wordWordElement) {
+					const spanElement = document.createElement('span');
+					spanElement.classList.add('c-word__word');
+					spanElement.innerText = wordUnderGuess;
+					wordElement.appendChild(spanElement);
+					wordWordElement = wordElement.querySelector('span');
+				} else if (!hasImages && wordWordElement) {
+					spanElement.innerText = wordUnderGuess;
 				}
 
 				if (currentRound.wordSkipAllowed) {
@@ -518,7 +528,7 @@ function beep(duration, frequency, volume){
 					liveRegionElement.innerText = `Le nouveau mot est ${newWord}${newWord !== dictionaryEntry.desc ? `, l'image associée contient ${dictionaryEntry.desc}` : ''}`;
 				}
 				else {
-					wordElement.innerText = newWord;
+					wordWordElement.innerText = newWord;
 					liveRegionElement.innerText = `Le nouveau mot est ${newWord}`;
 				}
 			},
