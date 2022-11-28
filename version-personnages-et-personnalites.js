@@ -46,7 +46,6 @@ const gameVersion = {
 		'Mimie Mathy',
 		'Louis De Funes',
 		'François Hollande',
-		'Nicolas Sarcozy',
 		'Brigitte Bardot',
 		'Alaoin Delon',
 		'Gérard Depardieu',
