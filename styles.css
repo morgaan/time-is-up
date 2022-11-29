@@ -40,6 +40,10 @@ p {
 	line-height: 1.5rem;
 }
 
+form {
+	line-height: 2.5;
+}
+
 fieldset {
 	margin-top: 1rem;
 	border: 0px none;
@@ -49,13 +53,8 @@ fieldset {
 
 legend {
 	font-weight: bold;
-	color: #0ebeff;
+	color: #ffd033;
 }
-
-label {
-	display: block;
-}
-
 
 *:focus {
 	outline: 3px solid #ffd033;
@@ -160,18 +159,6 @@ figcaption {
 	width: var(--timer-visual-width);
 	height: 100%;
 	background-color: deeppink;
-}
-
-.c-settings {
-	display: grid;
-	max-width: 600px;
-	grid-template-columns: repeat(2, auto);
-	grid-template-rows: repeat(3, auto);
-}
-
-.c-settings__version,
-.c-settings__submit {
-	grid-column: span 2;
 }
 
 .c-box {
@@ -303,6 +290,47 @@ figcaption {
 	background-color: black;
 	opacity: 0.6;
 	overflow: hidden;
+}
+
+.c-form__field-wrapper input[type="radio"] {
+	clip-path: inset(50%);
+	height: 1px;
+	overflow: hidden;
+	position: absolute;
+	white-space: nowrap;
+	width: 1px;
+}
+
+.c-form__field-wrapper label {
+	display: flex;
+	align-items: center;
+	font-weight: 400;
+	cursor: pointer;
+	padding: 0;
+}
+
+.c-form__field-wrapper label:before {
+	content: "";
+	flex-shrink: 0;
+	width: 1.5rem;
+	height: 1.5rem;
+	background-color: #ffffff;
+	border: 3px solid #0ebeff;
+	border-radius: 50%;
+	margin-right: 0.5rem;
+}
+
+.c-form__field-wrapper input[type="radio"]:focus + label:before {
+	box-shadow: 0 0 0 3px #ffd033;
+}
+
+.c-form__field-wrapper input[type="radio"]:checked + label:before {
+	background: radial-gradient(#01324b 0%, #01324b 40%, #fff 40%);
+	border-color: #0ebeff;
+}
+
+.c-settings__submit {
+	margin-top: 24px;
 }
 
 /**

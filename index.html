@@ -17,58 +17,61 @@
 		<link rel="stylesheet" href="./styles.css">
 	</head>
 	<body>
-		<h1>Time's up</h1> 
+		<a class="c-logo c-box c-box--logo" href="./index.html">
+			<img src="./images/logo.svg" alt="Time is up">
+		</a>
+		<h1 class="sr-only">Time's up - Paramètres</h1>
 		<p>Bienvenue dans notre jeu de Time's up&#8239;!</p>
 		<form method="GET" action="./game.html" class="c-settings">
 			<div class="c-settings__teams">
 				<fieldset>
 					<legend>Nombre d'équipes</legend>
-					<label>
-						<input id="numberOfTeams" name="numberOfTeams" type="radio"value="2">
-						<span>2</span>
-					</label>
-					<label>
-						<input id="numberOfTeams" name="numberOfTeams" type="radio"value="3">
-						<span>3</span>
-					</label>
-					<label>
-						<input id="numberOfTeams" name="numberOfTeams" type="radio"value="4">
-						<span>4</span>
-					</label>
+					<div class="c-form__field-wrapper">
+						<input id="numberOfTeams2" name="numberOfTeams" type="radio" value="2">
+						<label for="numberOfTeams2">2</label>
+					</div>
+					<div class="c-form__field-wrapper">
+						<input id="numberOfTeams3" name="numberOfTeams" type="radio" value="3">
+						<label for="numberOfTeams3">3</label>
+					</div>
+					<div class="c-form__field-wrapper">
+						<input id="numberOfTeams4" name="numberOfTeams" type="radio" value="4">
+						<label for="numberOfTeams4">4</label>
+					</div>
 				</fieldset>
 			</div>
 			<div class="c-settings__words">
 				<fieldset>
 					<legend>Nombre de mots à deviner</legend>
-					<label>
-						<input id="numberOfWordsToGuess" name="numberOfWordsToGuess" type="radio"value="10">
-						<span>10</span>
-					</label>
-					<label>
-						<input id="numberOfWordsToGuess" name="numberOfWordsToGuess" type="radio"value="20">
-						<span>20</span>
-					</label>
+					<div class="c-form__field-wrapper">
+						<input id="numberOfWordsToGuess10" name="numberOfWordsToGuess" type="radio" value="10">
+						<label for="numberOfWordsToGuess10">10</label>
+					</div>
+					<div class="c-form__field-wrapper">
+						<input id="numberOfWordsToGuess20" name="numberOfWordsToGuess" type="radio" value="20">
+						<label for="numberOfWordsToGuess20">20</label>
+					</div>
 				</fieldset>
 			</div>
 			<div class="c-settings__version">
 				<fieldset>
 					<legend>Version</legend>
-					<label>
-						<input id="gameVersion" name="gameVersion" type="radio" value="kids-with-images">
-						<span>Enfants avec images</span>
-					</label>
-					<label>
-						<input id="gameVersion" name="gameVersion" type="radio" value="personnages-et-personnalites">
-						<span>Personnages et Personnalités</span>
-					</label>
-					<label>
-						<input id="gameVersion" name="gameVersion" type="radio" value="metiers-sports-et-animaux">
-						<span>Métiers, Sports et Animaux</span>
-					</label>
-					<label>
-						<input id="gameVersion" name="gameVersion" type="radio" value="actions-et-expressions">
-						<span>Actions et Expressions</span>
-					</label>
+					<div class="c-form__field-wrapper">
+						<input id="gameVersionKidsWithImage" name="gameVersion" type="radio" value="kids-with-images">
+						<label for="gameVersionKidsWithImage">Enfants avec images</label>
+					</div>
+					<div class="c-form__field-wrapper">
+						<input id="gameVersionCharactersAndPersonalies" name="gameVersion" type="radio" value="personnages-et-personnalites">
+						<label for="gameVersionCharactersAndPersonalies">Personnages et Personnalités</label>
+					</div>
+					<div class="c-form__field-wrapper">
+						<input id="gameVersionJobSportAndAnimals" name="gameVersion" type="radio" value="metiers-sports-et-animaux">
+						<label for="gameVersionJobSportAndAnimals">Métiers, Sports et Animaux</label>
+					</div>
+					<div class="c-form__field-wrapper">
+						<input id="gameVersionActionAndExpressions" name="gameVersion" type="radio" value="actions-et-expressions">
+						<label for="gameVersionActionAndExpressions">Actions et Expressions</label>
+					</div>
 				</fieldset>
 			</div>
 			<button class="c-button c-settings__submit" type="submit">
