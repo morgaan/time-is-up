@@ -6,52 +6,6 @@
 const AudioContext = window.AudioContext || window.webkitAudioContext;
 const myAudioContext = new AudioContext();
 
-/**
- * Helper function to emit a beep sound in the browser using the Web Audio API.
- * Source: https://ourcodeworld.com/articles/read/1627/how-to-easily-generate-a-beep-notification-sound-with-javascript
- * 
- * @param {number} duration - The duration of the beep sound in milliseconds.
- * @param {number} frequency - The frequency of the beep sound.
- * @param {number} volume - The volume of the beep sound.
- * 
- * @returns {Promise} - A promise that resolves when the beep sound is finished.
- */
-function beep(duration, frequency, volume){
-    return new Promise((resolve, reject) => {
-        // Set default duration if not provided
-        duration = duration || 200;
-        frequency = frequency || 440;
-        volume = volume || 100;
-
-        try{
-            let oscillatorNode = myAudioContext.createOscillator();
-            let gainNode = myAudioContext.createGain();
-            oscillatorNode.connect(gainNode);
-
-            // Set the oscillator frequency in hertz
-            oscillatorNode.frequency.value = frequency;
-
-            // Set the type of oscillator
-            oscillatorNode.type= "square";
-            gainNode.connect(myAudioContext.destination);
-
-            // Set the gain to the volume
-            gainNode.gain.value = volume * 0.01;
-
-            // Start audio with the desired duration
-            oscillatorNode.start(myAudioContext.currentTime);
-            oscillatorNode.stop(myAudioContext.currentTime + duration * 0.001);
-
-            // Resolve the promise when the sound is finished
-            oscillatorNode.onended = () => {
-                resolve();
-            };
-        }catch(error){
-            reject(error);
-        }
-    });
-}
-
 // TODO Swap alerts with dialogs
 (function(window, document, undefined) {
 	const TimesUp = (function() {
@@ -83,6 +37,12 @@ function beep(duration, frequency, volume){
 		let timerElement;
 		let timerVisualElement;
 		let timerRemainingElement;
+		let failedAudioElement;
+		let succeedAudioElement;
+		let stopTurnAudioElement;
+		let countdownTickAudioElement;
+		let timeIsUpAudioElement;
+		let endOfGameAudioElement;
 
 		let previousActiveElement;
 		let dialog;
@@ -321,7 +281,7 @@ function beep(duration, frequency, volume){
 		}
 
 		function onStopTurn() {
-			AUDIO.stopSound();
+			AUDIO.stopTurnSound();
 
 			endOfTurn();
 		}
@@ -458,6 +418,12 @@ function beep(duration, frequency, volume){
 				dialog = document.querySelector('#dialog');
 				dialogMask = dialog.querySelector('#dialog-mask');
 				dialogWindow = dialog.querySelector('#dialog-window');
+				timeIsUpAudioElement = document.querySelector('#time-is-up-audio');
+				failedAudioElement = document.querySelector('#failed-audio');
+				succeedAudioElement = document.querySelector('#succeed-audio');
+				stopTurnAudioElement = document.querySelector('#stop-turn-audio');
+				countdownTickAudioElement = document.querySelector('#countdown-tick-audio');
+				endOfGameAudioElement = document.querySelector('#end-of-game-audio');
 			},
 			setupBoard: function() {
 				const {
@@ -589,22 +555,28 @@ function beep(duration, frequency, volume){
 
 		const AUDIO = {
 			timeIsUpSound: function () {
-				beep(250, 150, 100).then(() => beep(300, 100, 100)).then(() =>beep(400, 80, 100)).then(() =>beep(1500, 50, 100));
+				timeIsUpAudioElement.currentTime = 0;
+				timeIsUpAudioElement.play();
 			},
 			failedSound: function () {
-				beep(100, 100, 100).then(() => beep(100, 400, 100)).then(() =>beep(100, 100, 100));
+				failedAudioElement.currentTime = 0;
+				failedAudioElement.play();
 			},
 			succeedSound: function () {
-				beep(60, 600, 100).then(() => beep(100, 800, 100));
+				succeedAudioElement.currentTime = 0;
+				succeedAudioElement.play();
 			},
-			stopSound: function () {
-				beep(120, 300, 100).then(() =>beep(200, 100, 100));
+			stopTurnSound: function () {
+				stopTurnAudioElement.currentTime = 0;
+				stopTurnAudioElement.play();
 			},
 			tickSound: function () {
-				beep(120, 180, 100);
+				countdownTickAudioElement.currentTime = 0;
+				countdownTickAudioElement.play();
 			},
 			endOfGameSound: function () {
-				beep(150, 1000, 100).then(() => beep(200, 1500, 100)).then(() =>beep(400, 2000, 100)).then(() =>beep(500, 2500, 100)).then(beep(250, 1000, 100).then(() => beep(300, 1500, 100)).then(() =>beep(400, 2000, 100))).then(() =>beep(400, 2000, 100)).then(() =>beep(500, 2500, 100)).then(beep(250, 1000, 100));
+				endOfGameAudioElement.currentTime = 0;
+				endOfGameAudioElement.play();
 			}
 		};
 
