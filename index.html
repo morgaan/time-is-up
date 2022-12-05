@@ -17,66 +17,26 @@
 		<link rel="stylesheet" href="./styles.css">
 	</head>
 	<body>
-		<a class="c-logo c-box c-box--logo" href="./index.html">
-			<img src="./images/logo.svg" alt="Time is up">
-		</a>
-		<h1 class="sr-only">Time's up - Paramètres</h1>
-		<p>Bienvenue dans notre jeu de Time's up&#8239;!</p>
-		<form method="GET" action="./game.html" class="c-settings">
-			<div class="c-settings__teams">
-				<fieldset>
-					<legend>Nombre d'équipes</legend>
-					<div class="c-form__field-wrapper">
-						<input id="numberOfTeams2" name="numberOfTeams" type="radio" value="2">
-						<label for="numberOfTeams2">2</label>
-					</div>
-					<div class="c-form__field-wrapper">
-						<input id="numberOfTeams3" name="numberOfTeams" type="radio" value="3">
-						<label for="numberOfTeams3">3</label>
-					</div>
-					<div class="c-form__field-wrapper">
-						<input id="numberOfTeams4" name="numberOfTeams" type="radio" value="4">
-						<label for="numberOfTeams4">4</label>
-					</div>
-				</fieldset>
+		<h1 class="sr-only">Time is up - Page d'accueil</h1>
+		<div class="c-home">
+			<a class="c-home__logo" href="./index.html">
+				<img src="./images/logo.svg" alt="Time is up">
+			</a>
+			<div class="c-home__text">
+				<p>Bienvenue dans notre jeu de Time's up&#8239;!</p>
 			</div>
-			<div class="c-settings__words">
-				<fieldset>
-					<legend>Nombre de mots à deviner</legend>
-					<div class="c-form__field-wrapper">
-						<input id="numberOfWordsToGuess10" name="numberOfWordsToGuess" type="radio" value="10">
-						<label for="numberOfWordsToGuess10">10</label>
-					</div>
-					<div class="c-form__field-wrapper">
-						<input id="numberOfWordsToGuess20" name="numberOfWordsToGuess" type="radio" value="20">
-						<label for="numberOfWordsToGuess20">20</label>
-					</div>
-				</fieldset>
+			<div class="c-home__start">
+				<a href="settings.html" class="c-cta-link">
+					Démarrer
+				</a>
 			</div>
-			<div class="c-settings__version">
-				<fieldset>
-					<legend>Version</legend>
-					<div class="c-form__field-wrapper">
-						<input id="gameVersionKidsWithImage" name="gameVersion" type="radio" value="kids-with-images">
-						<label for="gameVersionKidsWithImage">Enfants avec images</label>
-					</div>
-					<div class="c-form__field-wrapper">
-						<input id="gameVersionCharactersAndPersonalies" name="gameVersion" type="radio" value="personnages-et-personnalites">
-						<label for="gameVersionCharactersAndPersonalies">Personnages et Personnalités</label>
-					</div>
-					<div class="c-form__field-wrapper">
-						<input id="gameVersionJobSportAndAnimals" name="gameVersion" type="radio" value="metiers-sports-et-animaux">
-						<label for="gameVersionJobSportAndAnimals">Métiers, Sports et Animaux</label>
-					</div>
-					<div class="c-form__field-wrapper">
-						<input id="gameVersionActionAndExpressions" name="gameVersion" type="radio" value="actions-et-expressions">
-						<label for="gameVersionActionAndExpressions">Actions et Expressions</label>
-					</div>
-				</fieldset>
+			<div class="c-home__credits">
+				<h2>Credits:</h2>
+				<ul>
+					<li>Dévelopment: <a href="https://morgan.cugerone.com">Morgan CUGERONE</a></li>
+					<li>Effets sonores: <a href="https://dreikelvin.nl">Dreikelvin</a></li>
+				</ul>
 			</div>
-			<button class="c-button c-settings__submit" type="submit">
-				C'est parti!
-			</button>
-		</form>
+		</div>
 	</body>
 </html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="fr">
+	<head>
+		<meta charset="UTF-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link rel="apple-touch-icon" sizes="180x180" href="/images/favicons/apple-touch-icon.png">
+		<link rel="icon" type="image/png" sizes="32x32" href="/images/favicons/favicon-32x32.png">
+		<link rel="icon" type="image/png" sizes="16x16" href="/images/favicons/favicon-16x16.png">
+		<link rel="manifest" href="/images/favicons/site.webmanifest">
+		<link rel="mask-icon" href="/images/favicons/safari-pinned-tab.svg" color="#5bbad5">
+		<link rel="shortcut icon" href="/images/favicons/favicon.ico">
+		<meta name="msapplication-TileColor" content="#ffc40d">
+		<meta name="msapplication-config" content="/images/favicons/browserconfig.xml">
+		<meta name="theme-color" content="#ffd033">
+		<title>Time is up</title>
+		<link rel="stylesheet" href="./styles.css">
+	</head>
+	<body>
+		<a class="c-logo c-box c-box--logo" href="./index.html">
+			<img src="./images/logo.svg" alt="Time is up">
+		</a>
+		<h1 class="sr-only">Time is up - Paramètres</h1>
+		<form method="GET" action="./game.html" class="c-settings">
+			<div class="c-settings__teams">
+				<fieldset>
+					<legend>Nombre d'équipes</legend>
+					<div class="c-form__fields">
+						<div class="c-form__field-wrapper">
+							<input id="numberOfTeams2" name="numberOfTeams" type="radio" value="2">
+							<label for="numberOfTeams2">2</label>
+						</div>
+
+						<div class="c-form__field-wrapper">
+							<input id="numberOfTeams3" name="numberOfTeams" type="radio" value="3">
+							<label for="numberOfTeams3">3</label>
+						</div>
+
+						<div class="c-form__field-wrapper">
+							<input id="numberOfTeams4" name="numberOfTeams" type="radio" value="4">
+							<label for="numberOfTeams4">4</label>
+						</div>
+					</div>
+				</fieldset>
+			</div>
+			<div class="c-settings__words">
+				<fieldset>
+					<legend>Nombre de mots à deviner</legend>
+					<div class="c-form__fields">
+						<div class="c-form__field-wrapper">
+							<input id="numberOfWordsToGuess10" name="numberOfWordsToGuess" type="radio" value="10">
+							<label for="numberOfWordsToGuess10">10</label>
+						</div>
+						<div class="c-form__field-wrapper">
+							<input id="numberOfWordsToGuess15" name="numberOfWordsToGuess" type="radio" value="15">
+							<label for="numberOfWordsToGuess15">15</label>
+						</div>
+						<div class="c-form__field-wrapper">
+							<input id="numberOfWordsToGuess20" name="numberOfWordsToGuess" type="radio" value="20">
+							<label for="numberOfWordsToGuess20">20</label>
+						</div>
+					</div>
+				</fieldset>
+			</div>
+			<div class="c-settings__version">
+				<fieldset>
+					<legend>Version</legend>
+					<div class="c-form__field-wrapper">
+						<input id="gameVersionKidsWithImage" name="gameVersion" type="radio" value="kids-with-images">
+						<label for="gameVersionKidsWithImage">Enfants avec images</label>
+					</div>
+					<div class="c-form__field-wrapper">
+						<input id="gameVersionCharactersAndPersonalies" name="gameVersion" type="radio" value="personnages-et-personnalites">
+						<label for="gameVersionCharactersAndPersonalies">Personnages et Personnalités</label>
+					</div>
+					<div class="c-form__field-wrapper">
+						<input id="gameVersionJobSportAndAnimals" name="gameVersion" type="radio" value="metiers-sports-et-animaux">
+						<label for="gameVersionJobSportAndAnimals">Métiers, Sports et Animaux</label>
+					</div>
+					<div class="c-form__field-wrapper">
+						<input id="gameVersionActionAndExpressions" name="gameVersion" type="radio" value="actions-et-expressions">
+						<label for="gameVersionActionAndExpressions">Actions et Expressions</label>
+					</div>
+				</fieldset>
+			</div>
+			<button class="c-button c-settings__submit" type="submit">
+				C'est parti!
+			</button>
+		</form>
+	</body>
+</html>

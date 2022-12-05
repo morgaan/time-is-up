@@ -292,6 +292,15 @@ figcaption {
 	overflow: hidden;
 }
 
+.c-form__fields {
+	display: flex;
+	flex-wrap: wrap;
+}
+
+.c-form__fields > * {
+	margin-right: 2rem;
+}
+
 .c-form__field-wrapper input[type="radio"] {
 	clip-path: inset(50%);
 	height: 1px;
@@ -331,6 +340,92 @@ figcaption {
 
 .c-settings__submit {
 	margin-top: 24px;
+}
+
+@media only screen and (min-width: 581px) {
+	.c-settings {
+		display: grid;
+		grid-gap: .5rem;
+		grid-template-columns: 1fr 1fr;
+		grid-template-rows: auto auto auto;
+		grid-template-areas: "teams version"
+							 "words version"
+							 "submit submit";
+	}
+
+	.c-settings__teams {
+		grid-area: teams;
+	}
+	.c-settings__words {
+		grid-area: words;
+	}
+
+	.c-settings__version {
+		grid-area: version;
+	}
+
+	.c-settings__submit {
+		margin-top: 0;
+		grid-area: submit;
+	}
+}
+
+.c-home {
+	display: grid;
+	grid-gap: .5rem;
+	grid-template-columns: 1fr;
+	grid-template-rows: 20vmax repeat(2, 1fr) auto;
+	grid-template-areas: "logo"
+	"text"
+	"start"
+	"credits";
+	height: calc(100vh - 1rem);
+}
+
+.c-home__logo {
+	grid-area: logo;
+	background-color: #ffd033;
+	display: flex;
+	align-items: center;
+	padding: 4em;
+	border-radius: 8px;
+}
+
+.c-home__text {
+	grid-area: text;
+	font-size: 1.5rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+}
+
+.c-home__start {
+	grid-area: start;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.c-cta-link {
+	font-size: 2rem;
+	color: #ffd033;
+}
+
+.c-home__credits {
+	grid-area: credits;
+	background: #0ebeff;
+	border-radius: 8px;
+	padding: 8px 16px;
+	color: #27284c;
+}
+
+.c-home__credits ul {
+	margin: 0;
+}
+
+.c-home__credits a {
+  color: #27284c;
 }
 
 /**

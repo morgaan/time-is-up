@@ -203,7 +203,7 @@ const myAudioContext = new AudioContext();
 			}
 
 			infoDialog('Fin de la partie, voici le classement', dialogMessage, 'Recommençer une partie !', function returnToIndex() {
-				location.href = `${location.href.match(/^(.*\/)game\./)[1]}index.html`;
+				location.href = `${location.href.match(/^(.*\/)game\./)[1]}settings.html`;
 			});
 		}
 
