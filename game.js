@@ -4,7 +4,7 @@
 // The magic fallback address delay issue when playing sound in Safari
 // Reference: https://stackoverflow.com/questions/9811429/html5-audio-tag-on-safari-has-a-delay/54119854#54119854
 const AudioContext = window.AudioContext || window.webkitAudioContext;
-const myAudioContext = new AudioContext();
+const audioCtx = new AudioContext();
 
 // TODO Swap alerts with dialogs
 (function(window, document, undefined) {
