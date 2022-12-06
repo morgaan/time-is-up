@@ -387,8 +387,15 @@ figcaption {
 	background-color: #ffd033;
 	display: flex;
 	align-items: center;
+	justify-content: center;
 	padding: 4em;
 	border-radius: 8px;
+}
+
+.c-home__logo img {
+	width: 80%;
+	display: block;
+	height: auto;
 }
 
 .c-home__text {
